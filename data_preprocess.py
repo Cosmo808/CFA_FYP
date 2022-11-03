@@ -52,7 +52,7 @@ class Data:
             for i in range(len(data_nz)-1):
                 data_pair = [data_nz[i], data_nz[i+1], ind]
                 pairwise_data.append(data_pair)
-        return np.array(pairwise_data)
+        return np.array(pairwise_data, dtype=float)
 
     @staticmethod
     def combine_pairwise_data(pair_data1, pair_data2):
@@ -71,6 +71,6 @@ class Data:
             ind2 = ind[1]
             combined_data1.append(pair_data1[ind1])
             combined_data2.append(pair_data2[ind2])
-        return np.array(combined_data1), np.array(combined_data2)
+        return np.array(combined_data1, dtype=float), np.array(combined_data2, dtype=float)
 
 
