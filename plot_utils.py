@@ -27,3 +27,4 @@ class Plot_utils:
 
         ellipse.set_transform(transform + ax.transData)
         ax.add_patch(ellipse)
+        return pearson
