@@ -5,10 +5,14 @@ from data_preprocess import Data
 from va_baye_gaus_mix import BGM
 from plot_utils import Plot_utils
 
-
 if __name__ == "__main__":
+    # hyperparameter
+    n_components = 5
+    prior = 1e+00
+
+    fit_flag = False
     data = Data()
-    bgm = BGM(n_components=8)
+    bgm = BGM(n_components, prior)
     plot = Plot_utils()
 
     pairwise_age, pairwise_bfp, pairwise_bmi = data.pairwise_data()
@@ -18,18 +22,19 @@ if __name__ == "__main__":
     delta_bfp = pairwise_bfp[:, 1] - pairwise_bfp[:, 0]
     delta_bfp_per_year = delta_bfp / delta_age
 
-    pairwise_data = pairwise_age[:, 0:2]
+    pairwise_data = pairwise_bfp[:, 0:2]
     pairwise_data[:, 1] = delta_bfp_per_year
 
-    # bgm_model = bgm.fit_bgm(pairwise_data)
-    # bgm.save_bgm()
+    if fit_flag:
+        bgm.fit_bgm(pairwise_data)
+        bgm.save_bgm()
 
-    bgm_model = bgm.load_bgm(8, 1e+05)
+    bgm_model = bgm.load_bgm(n_components, prior)
 
     weights = bgm_model.weights_
     labels = bgm_model.predict(pairwise_data)
-    means = bgm_model.means_    # (n_components, n_features)
-    covariances = bgm_model.covariances_    # (n_components, n_features, n_features)
+    means = bgm_model.means_  # (n_components, n_features)
+    covariances = bgm_model.covariances_  # (n_components, n_features, n_features)
 
     fig, ax = plt.subplots(1, 1)
     colors = cm.cmaps_listed.get('plasma')
@@ -38,7 +43,8 @@ if __name__ == "__main__":
     for x, y, label in zip(pairwise_data[:scatter_num, 0], pairwise_data[:scatter_num, 1], labels[:scatter_num]):
         plt.scatter(x, y, color=colors[label])
 
-    color_transparency_weight = (np.array(weights) - np.min(weights) + 0.01) / (np.max(weights) - np.min(weights) + 0.01)
+    color_transparency_weight = (np.array(weights) - np.min(weights) + 0.01) / (
+                np.max(weights) - np.min(weights) + 0.01)
     pearson_corr = []
     for i in range(len(means)):
         mean = means[i]

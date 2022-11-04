@@ -15,6 +15,7 @@ bmi = np.genfromtxt('21001.csv', delimiter=',', dtype=float)
 age = np.genfromtxt('21003.csv', delimiter=',', dtype=int)
 sex = np.genfromtxt('22001.csv', delimiter=',', dtype=str)    # male: 1, female: 0
 bfp = np.genfromtxt('23099.csv', delimiter=',', dtype=float)    # body fat percentage
+gmv = np.genfromtxt('25005.csv', delimiter=',', dtype=float)
 
 # eid and sex
 np_eid = []
@@ -28,21 +29,27 @@ for row in sex:
 save_np('eid', np.array(np_eid))
 save_np('sex', np.array(np_sex))
 
-# bmi and body fat percentage (bfp)
+# bmi, body fat percentage (bfp) and gmv
 np_bmi = []
 np_bfp = []
-for row1, row2 in zip(bmi, bfp):
+np_gmv = []
+for row1, row2, row3 in zip(bmi, bfp, gmv):
     for i, j in enumerate(row1):
         if math.isnan(j):
             row1[i] = 0
     for i, j in enumerate(row2):
         if math.isnan(j):
             row2[i] = 0
+    for i, j in enumerate(row3):
+        if math.isnan(j):
+            row3[i] = 0
     np_bmi.append(row1[1:])
     np_bfp.append(row2[1:])
+    np_gmv.append(row3[1:])
 
 save_np('bmi', np.array(np_bmi))
 save_np('bfp', np.array(np_bfp))
+save_np('gmv', np.array(np_gmv))
 
 # age
 np_age = []
