@@ -45,7 +45,7 @@ for row1, row2, row3 in zip(bmi, bfp, gmv):
             row3[i] = 0
     np_bmi.append(row1[1:])
     np_bfp.append(row2[1:])
-    np_gmv.append(row3[1:])
+    np_gmv.append([0, 0, row3[1], row3[2]])
 
 save_np('bmi', np.array(np_bmi))
 save_np('bfp', np.array(np_bfp))

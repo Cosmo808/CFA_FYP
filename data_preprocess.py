@@ -63,7 +63,7 @@ class Data:
         return np.array(pairwise_data, dtype=float)
 
     @staticmethod
-    def combine_pairwise_data(pair_data1, pair_data2):
+    def match_pairwise_data(pair_data1, pair_data2):
         index1 = pair_data1[:, 2]
         index2 = pair_data2[:, 2]
         first1 = pair_data1[:, 3]
@@ -87,10 +87,56 @@ class Data:
                 cnt2 = eq_index[eq_first]
                 eq_cnt2.append(cnt2)
 
-        combine_data1 = []
-        combine_data2 = []
+        match_data1 = []
+        match_data2 = []
         for cnt in eq_cnt1:
-            combine_data1.append(pair_data1[cnt])
+            match_data1.append(pair_data1[cnt])
         for cnt in eq_cnt2:
-            combine_data2.append(pair_data2[cnt])
-        return np.array(combine_data1), np.array(combine_data2)
+            match_data2.append(pair_data2[cnt])
+        return np.array(match_data1), np.array(match_data2)
+
+    def single_point_data(self):
+        single_age = []
+        single_bfp = []
+        single_bmi = []
+        single_gmv = []
+        for i, j, k, l, index in zip(self.age, self.bfp, self.bmi, self.gmv, range(len(self.age[:, 0]))):
+            i_nz_ind = np.where(i != 0)[0]
+            j_nz_ind = np.where(j != 0)[0]
+            k_nz_ind = np.where(k != 0)[0]
+            l_nz_ind = np.where(l != 0)[0]
+            for ind in i_nz_ind:
+                single_age.append([i[ind], index, ind])
+            for ind in j_nz_ind:
+                single_bfp.append([j[ind], index, ind])
+            for ind in k_nz_ind:
+                single_bmi.append([k[ind], index, ind])
+            for ind in l_nz_ind:
+                single_gmv.append([l[ind], index, ind])
+        return np.array(single_age), np.array(single_bfp), np.array(single_bmi), np.array(single_gmv)
+
+    @staticmethod
+    def match_pairwise_single(pairwise, single, pairwise_first_time, pairwise_second_time, single_time):
+        pairwise = pairwise[pairwise[:, 3] == pairwise_first_time]
+        pairwise = pairwise[pairwise[:, 4] == pairwise_second_time]
+        single = single[single[:, 2] == single_time]
+        single_index = single[:, 1]
+
+        ind1 = []
+        ind2 = []
+        for i, row in enumerate(pairwise):
+            index = row[2]
+            try:
+                eq_index = np.where(single_index == index)[0][0]
+            except IndexError:
+                continue
+            ind1.append(i)
+            ind2.append(eq_index)
+
+        match_pairwise = []
+        match_single = []
+        for i in ind1:
+            match_pairwise.append(pairwise[i])
+        for i in ind2:
+            match_single.append(single[i])
+        return np.array(match_pairwise), np.array(match_single)
