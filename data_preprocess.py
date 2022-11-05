@@ -140,3 +140,30 @@ class Data:
         for i in ind2:
             match_single.append(single[i])
         return np.array(match_pairwise), np.array(match_single)
+
+    @staticmethod
+    def match_single_data(single_data1, single_data2):
+        index2 = single_data2[:, 1]
+        time2 = single_data2[:, 2]
+
+        ind1 = []
+        ind2 = []
+        for i, row in enumerate(single_data1):
+            index = row[1]
+            t = row[2]
+            eq_index = np.where(index2 == index)[0]
+            time = time2[eq_index]
+            try:
+                eq_time = np.where(time == t)[0][0]
+            except IndexError:
+                continue
+            ind1.append(i)
+            ind2.append(eq_index[eq_time])
+
+        single1 = []
+        single2 = []
+        for i in ind1:
+            single1.append(single_data1[i])
+        for i in ind2:
+            single2.append(single_data2[i])
+        return np.array(single1), np.array(single2)

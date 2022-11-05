@@ -10,7 +10,7 @@ if __name__ == "__main__":
     n_components = 5
     prior = 1e+05
 
-    fit_flag = True
+    fit_flag = False
     data = Data()
     bgm = BGM(n_components, prior)
     plot = Plot_utils()
