@@ -10,7 +10,7 @@ if __name__ == "__main__":
     n_components = 5
     prior = 1e+05
 
-    fit_flag = False
+    fit_flag = True
     data = Data()
     bgm = BGM(n_components, prior)
     plot = Plot_utils()
@@ -25,11 +25,12 @@ if __name__ == "__main__":
     pairwise_data[:, 0] = single_bfp[:, 0]
     pairwise_data[:, 1] = delta_gmv
 
+    bgm_path = 'model/bfp&delta_gmv_bgm_model'
     if fit_flag:
         bgm.fit_bgm(pairwise_data)
-        bgm.save_bgm()
+        bgm.save_bgm(bgm_path)
 
-    bgm_model = bgm.load_bgm(n_components, prior)
+    bgm_model = bgm.load_bgm(bgm_path, n_components, prior)
 
     weights = bgm_model.weights_
     labels = bgm_model.predict(pairwise_data)

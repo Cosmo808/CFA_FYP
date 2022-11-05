@@ -19,16 +19,14 @@ class BGM:
                                                  weight_concentration_prior_type=self.weight_concentration_prior_type,
                                                  max_iter=self.max_iter, tol=self.tol).fit(pairwise)
 
-    def save_bgm(self):
-        bgm_path = 'bfp&delta_bfp_bgm_model'
+    def save_bgm(self, bgm_path):
         if not os.path.exists(bgm_path):
             os.makedirs(bgm_path)
         file_name = str(self.n_components) + '_' + str(self.weight_concentration_prior)
         file_name = os.path.join(bgm_path, file_name)
         joblib.dump(self.bgm_model, file_name)
 
-    def load_bgm(self, n_components, weight_concentration_prior):
-        bgm_path = 'bfp&delta_bfp_bgm_model'
+    def load_bgm(self, bgm_path, n_components, weight_concentration_prior):
         file_name = str(n_components) + '_' + str(weight_concentration_prior)
         file_name = os.path.join(bgm_path, file_name)
         self.bgm_model = joblib.load(file_name)
