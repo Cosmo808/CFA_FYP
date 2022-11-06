@@ -1,8 +1,5 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from data_preprocess import Data
-from plot_utils import Plot_utils
-from sklearn.linear_model import LinearRegression
+from np_data_preprocess import Numpy_data
 from stat_utils import Stat_utils
 import os
 
@@ -16,9 +13,9 @@ def save_np(file_name, np_array):
 
 
 if __name__ == "__main__":
-    data = Data()
+    data = Numpy_data()
     stat = Stat_utils()
-    match_flag = True
+    match_flag = False
 
     if match_flag:
         pairwise_age, pairwise_bfp, pairwise_bmi, pairwise_gmv = data.pairwise_data()
@@ -37,11 +34,7 @@ if __name__ == "__main__":
     single_bfp = np.load(os.path.join(data_path, 'bfp.npy'))
     single_gmv = np.load(os.path.join(data_path, 'gmv.npy'))
 
-    X = np.zeros(shape=(len(single_age[:, 0]), 3))
-    X[:, 0] = single_age[:, 0]
-    X[:, 1] = single_bfp[:, 0]
-    X[:, 2] = np.multiply(single_age[:, 0], single_bfp[:, 0])
-    y = single_gmv[:, 0]
+    # longitudinal: gmv ~ B * age_0 + B * bfp_0 + B * time_point * bfp_type
+    #                     + b * time_point + b * bfp_type
 
-    params = stat.linear_regression_params(X, y)
-    print(params)
+

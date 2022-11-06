@@ -4,20 +4,21 @@ import os
 
 
 class BGM:
-    def __init__(self, n_components, prior):
+    def __init__(self, n_components, prior, max_iter, tol):
         self.n_components = n_components
         self.init_params = 'kmeans'
         self.weight_concentration_prior_type = 'dirichlet_process'
         self.weight_concentration_prior = prior
-        self.max_iter = 2000
-        self.tol = 5.0e-03
+        self.max_iter = max_iter
+        self.tol = tol
         self.bgm_model = None
 
-    def fit_bgm(self, pairwise):
+    def fit_bgm(self, input_data):
         self.bgm_model = BayesianGaussianMixture(n_components=self.n_components, init_params=self.init_params,
                                                  weight_concentration_prior=self.weight_concentration_prior,
                                                  weight_concentration_prior_type=self.weight_concentration_prior_type,
-                                                 max_iter=self.max_iter, tol=self.tol).fit(pairwise)
+                                                 max_iter=self.max_iter, tol=self.tol)
+        self.bgm_model.fit_predict(input_data)
 
     def save_bgm(self, bgm_path):
         if not os.path.exists(bgm_path):

@@ -1,18 +1,20 @@
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
-from data_preprocess import Data
+from np_data_preprocess import Numpy_data
 from va_baye_gaus_mix import BGM
 from plot_utils import Plot_utils
 
 if __name__ == "__main__":
     # hyperparameter
     n_components = 5
-    prior = 1e+05
+    prior = 1e+03
+    max_iter = 2000
+    tol = 1e-03
 
-    fit_flag = True
-    data = Data()
-    bgm = BGM(n_components, prior)
+    fit_flag = False
+    data = Numpy_data()
+    bgm = BGM(n_components, prior, max_iter, tol)
     plot = Plot_utils()
 
     pairwise_age, pairwise_bfp, pairwise_bmi, pairwise_gmv = data.pairwise_data()
@@ -45,7 +47,7 @@ if __name__ == "__main__":
         plt.scatter(x, y, color=colors[label])
 
     color_transparency_weight = (np.array(weights) - np.min(weights) + 0.01) / (
-                np.max(weights) - np.min(weights) + 0.01)
+                np.max(weights) - np.min(weights) + 0.01) * 0.8
     pearson_corr = []
     for i in range(len(means)):
         mean = means[i]

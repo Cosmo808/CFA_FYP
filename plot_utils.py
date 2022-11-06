@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
+from scipy import stats
 
 
 class Plot_utils:
@@ -28,3 +29,10 @@ class Plot_utils:
         ellipse.set_transform(transform + ax.transData)
         ax.add_patch(ellipse)
         return pearson
+
+    @staticmethod
+    def gaussian_distribution(ax, mu, sigma, color, alpha, **kwargs):
+        x = np.linspace(mu - 5 * sigma, mu + 5 * sigma, 300)
+        y = stats.norm.pdf(x, mu, sigma)
+        ax.plot(x, y, color=color, alpha=alpha)
+        ax.fill_between(x, y, color=color, alpha=alpha, **kwargs)
