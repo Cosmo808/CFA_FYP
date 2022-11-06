@@ -12,11 +12,11 @@ import math
 if __name__ == "__main__":
     # hyperparameter
     n_components = 5
-    prior = 1e-00
+    prior = 1e+00
     max_iter = 3000
     tol = 1e-03
     
-    bgm_fit_flag = True
+    bgm_fit_flag = False
     data = Pandas_data()
     bgm = BGM(n_components, prior, max_iter, tol)
     stat = Stat_utils()
@@ -104,5 +104,3 @@ if __name__ == "__main__":
         print(params_all_data, '\n')
 
     plt.show()
-
-

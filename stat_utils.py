@@ -31,3 +31,4 @@ class Stat_utils:
         params_display["t-values"] = ts_b
         params_display["p-values"] = p_values
         return params_display
+

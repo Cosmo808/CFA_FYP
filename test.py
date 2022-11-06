@@ -26,8 +26,7 @@ if __name__ == "__main__":
 
     age_bfp_gmv = pd.concat([pd_age, pd_bfp, pd_gmv], axis=1)
     age_bfp_gmv = age_bfp_gmv.dropna()
-    print(age_bfp_gmv)
 
-    np_age = pd_age.to_numpy()
-    nz = np_age[~np.isnan(np_age)]
-    print(len(nz))
+    a=np.array([1,2,3])
+    b=np.array([3,4,5])
+    print(np.multiply(a,b))
