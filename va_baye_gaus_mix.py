@@ -18,7 +18,7 @@ class BGM:
                                                  weight_concentration_prior=self.weight_concentration_prior,
                                                  weight_concentration_prior_type=self.weight_concentration_prior_type,
                                                  max_iter=self.max_iter, tol=self.tol)
-        self.bgm_model.fit_predict(input_data)
+        self.bgm_model.fit(input_data)
 
     def save_bgm(self, bgm_path):
         if not os.path.exists(bgm_path):

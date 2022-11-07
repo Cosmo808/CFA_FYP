@@ -9,24 +9,12 @@ import matplotlib.cm as cm
 import math
 
 if __name__ == "__main__":
-    # hyperparameter
-    n_components = 5
-    prior = 1e-00
-    max_iter = 3000
-    tol = 1e-03
-
-    data = Pandas_data()
-    bgm = BGM(n_components, prior, max_iter, tol)
-    stat = Stat_utils()
-    plot = Plot_utils()
-
-    pd_age = data.age.iloc[:, 2]
-    pd_bfp = data.bfp.iloc[:, 2]
-    pd_gmv = data.gmv.iloc[:, 0]
-
-    age_bfp_gmv = pd.concat([pd_age, pd_bfp, pd_gmv], axis=1)
-    age_bfp_gmv = age_bfp_gmv.dropna()
-
-    a=np.array([1,2,3])
-    b=np.array([3,4,5])
-    print(np.multiply(a,b))
+    a= [1,1,3,3,4,2,1,2,3,4]
+    b = [[] for i in range(4)]
+    for i in range(1, 5):
+        a_np = np.array(a)
+        index = np.nonzero(a_np == i)
+        index = np.array(index).tolist()[0]
+        b[i-1] = index
+        print(index)
+    print(b)

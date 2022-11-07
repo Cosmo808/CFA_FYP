@@ -12,11 +12,11 @@ import math
 if __name__ == "__main__":
     # hyperparameter
     n_components = 5
-    prior = 1e+00
+    prior = 1e+05
     max_iter = 3000
     tol = 1e-03
     
-    bgm_fit_flag = False
+    bgm_fit_flag = True
     data = Pandas_data()
     bgm = BGM(n_components, prior, max_iter, tol)
     stat = Stat_utils()
@@ -72,6 +72,10 @@ if __name__ == "__main__":
         axs[1].text(x - 0.4, 1.01 * y, t)
 
     # cross-sectional: gmv ~ age + bfp
+    intercept = []
+    beta_age = []
+    beta_bfp = []
+    means_for_sort = []
 
     # all data
     X = np.ones(shape=[len(np_age), 2])
@@ -79,19 +83,27 @@ if __name__ == "__main__":
     X[:, 1] = np_bfp
     y = np_gmv
     params_all_data = stat.linear_regression_params(X, y)
-    print('######## All data: ########')
+    all_intercept = params_all_data['Coefficients'][0]
+    all_beta_age = params_all_data['Coefficients'][1]
+    all_beta_bfp = params_all_data['Coefficients'][2]
+    print('######## All data: sample {} ########'.format(len(y)))
     print(params_all_data, '\n')
 
     # labelled by bfp
     labels = bfp_bgm.predict(input_data)
     group_index = [[] for i in range(len(weights))]
-    for ind, label in enumerate(labels):
-        group_index[label].append(ind)
+    for i in range(len(weights)):
+        np_labels = np.array(labels)
+        index = np.nonzero(np_labels == i)
+        index = np.array(index).tolist()[0]
+        group_index[i] = index
 
     for group, index in enumerate(group_index):
-        if weights[group] < 0.0001:
+        if len(index) < 10:
             print('######## Group {}: not enough sample ########\n'.format(group))
             continue
+        else:
+            print('######## Group {}: weight {}, sample {} ########'.format(group, np.round(weights[group], 4), len(index)))
         labelled_age = np_age[index]
         labelled_bfp = np_bfp[index]
         labelled_gmv = np_gmv[index]
@@ -100,7 +112,29 @@ if __name__ == "__main__":
         X[:, 1] = labelled_bfp
         y = labelled_gmv
         params_all_data = stat.linear_regression_params(X, y)
-        print('######## Group {}: {} samples ########'.format(group, len(index)))
+        intercept.append(params_all_data['Coefficients'][0])
+        beta_age.append(params_all_data['Coefficients'][1])
+        beta_bfp.append(params_all_data['Coefficients'][2])
+        means_for_sort.append(means[group])
         print(params_all_data, '\n')
 
+    fig, axs = plt.subplots(3, 1)
+    titles = ['Intercept', 'Beta_age', 'Beta_bfp']
+    all_params = [all_intercept, all_beta_age, all_beta_bfp]
+    params = [intercept, beta_age, beta_bfp]
+
+    # sorted by mean
+    sort_index = np.argsort(means_for_sort)
+    for i in range(len(params)):
+        param = np.array(params[i])
+        sorted_param = param[sort_index]
+        params[i] = sorted_param
+
+    for ax, all_param, param, title in zip(axs, all_params, params, titles):
+        ax.plot(all_param, '*')
+        ax.plot(range(1, len(param) + 1), param, '.-')
+        ax.set_title(title)
+        text = np.round(param, 1)
+        # for x, y, t in zip(range(len(param)), param, text):
+        #     ax.text(x, y, t)
     plt.show()

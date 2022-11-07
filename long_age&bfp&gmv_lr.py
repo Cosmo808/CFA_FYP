@@ -17,7 +17,7 @@ if __name__ == "__main__":
     max_iter = 3000
     tol = 1e-03
 
-    bgm_fit_flag = False
+    bgm_fit_flag = True
     data = Pandas_data()
     bgm = BGM(n_components, prior, max_iter, tol)
     stat = Stat_utils()
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     colors = cm.cmaps_listed.get('plasma')
     colors = colors(np.linspace(0, 0.8, len(weights)))
     color_transparency_weight = (np.array(weights) - np.min(weights) + 0.01) / (
-            np.max(weights) - np.min(weights) + 0.01) * 0.8
+            np.max(weights) - np.min(weights) + 0.01) * 0.8 + 0.05
     fig, ax = plt.subplots(1, 1)
     for mean, var, i in zip(means, variances, range(len(means))):
         mu = mean
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         plot.gaussian_distribution(ax, mu, sigma, color=colors[i], alpha=color_transparency_weight[i], label=i)
         ax.legend()
 
-    fig, axs = plt.subplots(1, 2)
+    fig, axs = plt.subplots(2, 1)
     axs[0].bar(range(len(weights)), weights)
     axs[0].set_title('Weights')
     axs[0].set(xlabel='group')
@@ -105,7 +105,12 @@ if __name__ == "__main__":
     pd_data = pd_data.set_index('eid')
 
     me_model = smf.mixedlm('gmv ~ age_0 + bfp_0 + time_x_type',
-                           re_formula='1', data=pd_data, groups='delta_bfp_type')
+                           re_formula='~time_point', data=pd_data, groups='delta_bfp_type')
     me_model = me_model.fit()
     print(me_model.summary())
+
+    for i in range(len(weights)):
+        print('#### Group {}: weight {}, sample {}'.format(
+            i, np.round(weights[i], 4), np.count_nonzero(labels == i)
+        ))
     plt.show()
