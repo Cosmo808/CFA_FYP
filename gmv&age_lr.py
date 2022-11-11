@@ -63,6 +63,6 @@ if __name__ == "__main__":
 
     # gmv_it = (b_0 + b_1 * age_it) + (B_0i + B_1i * t)
     me_model = smf.mixedlm('gmv ~ age', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~time_point')
-    me_model = me_model.fit()
+    me_model = me_model.fit(method='cg')
     print(me_model.summary())
 
