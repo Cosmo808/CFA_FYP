@@ -5,6 +5,7 @@ from stat_utils import Stat_utils
 from pd_data_preprocess import Pandas_data
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
+from statsmodels.regression import mixed_linear_model
 import os
 
 
@@ -63,6 +64,7 @@ if __name__ == "__main__":
 
     # gmv_it = (b_0 + b_1 * age_it) + (B_0i + B_1i * t)
     me_model = smf.mixedlm('gmv ~ age', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~time_point')
-    me_model = me_model.fit(method='cg')
+    free = mixed_linear_model.MixedLMParams.from_components(np.ones(2), np.eye(2))
+    me_model = me_model.fit(free=free, method=['cg', 'lbfgs'])
     print(me_model.summary())
 
