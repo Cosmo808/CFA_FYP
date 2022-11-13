@@ -39,13 +39,13 @@ if __name__ == "__main__":
     pd_imputed_data = pd.DataFrame(data=imputed_data, index=pd_index, columns=['age_2', 'age_3', 'gmv_2', 'gmv_3'])
 
     # expand age
-    pd_imputed_age_0 = pd_imputed_data.iloc[:, 0]
-    pd_imputed_age_1 = pd_imputed_data.iloc[:, 1]
+    pd_imputed_age_0 = pd_imputed_data['age_2']
+    pd_imputed_age_1 = pd_imputed_data['age_3']
     ex_imputed_age = pd.concat([pd_imputed_age_0, pd_imputed_age_1])
 
     # expand gmv
-    pd_imputed_gmv_0 = pd_imputed_data.iloc[:, 2]
-    pd_imputed_gmv_1 = pd_imputed_data.iloc[:, 3]
+    pd_imputed_gmv_0 = pd_imputed_data['gmv_2']
+    pd_imputed_gmv_1 = pd_imputed_data['gmv_3']
     ex_imputed_gmv = pd.concat([pd_imputed_gmv_0, pd_imputed_gmv_1])
 
     # expand time point
