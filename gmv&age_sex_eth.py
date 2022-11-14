@@ -65,8 +65,11 @@ if __name__ == "__main__":
     # total expanded data
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_gmv, ex_time_point, ex_imputed_sex, ex_imputed_eth], axis=1)
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'gmv', 'eth_0': 'ethnicity'})
-    print(pd_ex_data)
+    # print(pd_ex_data)
 
     me_model = smf.mixedlm('gmv ~ time_point + sex + ethnicity', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~time_point')
     me_model = me_model.fit(method=['lbfgs', 'cg'])
     print(me_model.summary())
+    print(me_model.params)
+    print(me_model.bse_re)
+    print(me_model.random_effects)
