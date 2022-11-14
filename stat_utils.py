@@ -7,12 +7,14 @@ from sklearn.linear_model import LinearRegression
 class Stat_utils:
     def __init__(self):
         self.lr_model = None
+        self.lr_prediction = None
 
     def linear_regression_params(self, X, y):
         lr_model = LinearRegression().fit(X, y)
         self.lr_model = lr_model
         params = np.append(lr_model.intercept_, lr_model.coef_)
         predictions = lr_model.predict(X)
+        self.lr_prediction = predictions
 
         newX = np.append(np.ones((len(X), 1)), X, axis=1)
         MSE = (sum((y - predictions) ** 2)) / (len(newX) - len(newX[0]))

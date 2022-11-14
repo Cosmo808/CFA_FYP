@@ -1,16 +1,11 @@
+from pd_data_preprocess import Pandas_data
+from stat_utils import Stat_utils
+import matplotlib.pyplot as plt
+import impyute.imputation.cs.mice as mice
+from statsmodels.api import load
 import numpy as np
 import pandas as pd
-from pd_data_preprocess import Pandas_data
-from va_baye_gaus_mix import BGM
-from stat_utils import Stat_utils
-from plot_utils import Plot_utils
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from collections import Counter
-import math
 import os
-import impyute.imputation.cs.mice as mice
-import statsmodels.formula.api as smf
 
 
 def save_np(file_name, np_array):
@@ -72,56 +67,48 @@ if __name__ == "__main__":
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_gmv, ex_time_point, ex_imputed_sex, ex_imputed_eth], axis=1)
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'gmv', 'eth_0': 'ethnicity'})
 
-    # regress out covariates
-    fixed_intercept = 1046755.251
-    fixed_age_slope = -3874.538
-    fixed_sex_slope = -23596.208
-    fixed_eth_slope = 3729.030
+    plt.figure(0)
+    me_model = load('model/gmv&time_point_lme_model/lme_model')
+    random_effects = list(me_model.random_effects.items())
+    random_intercept = []
+    random_slope = []
 
-    random_intercept = 736388381.171
-    random_time_point_slope = 41077754.234
-    cov_inter_slope = -91070300.594
+    for result in random_effects:
+        random_intercept.append(result[1]['Group'])
+        random_slope.append(result[1]['time_point'])
 
-    regressed_gmv = pd_ex_data['gmv'] - (fixed_age_slope * pd_ex_data['age'] + fixed_sex_slope * pd_ex_data['sex']
-                                         + fixed_eth_slope * pd_ex_data['ethnicity'])
+    for x, y in zip(random_intercept, random_slope):
+        if np.random.rand() < 0.1:
+            plt.scatter(x, y)
 
-    len_index = len(pd_index.to_numpy())
-    pd_imputed_data['reg_gmv_0'] = regressed_gmv[:len_index]
-    pd_imputed_data['reg_gmv_1'] = regressed_gmv[len_index:]
-    # print(pd_imputed_da  ta)
-
-    regressed_baseline = pd_imputed_data['reg_gmv_0']
-    per_year = np.average(pd_imputed_data['age_3'] - pd_imputed_data['age_2'])
-    regressed_slope = (pd_imputed_data['reg_gmv_1'] - pd_imputed_data['reg_gmv_0']) / per_year
-
-    params = stat.linear_regression_params(regressed_baseline.to_numpy().reshape(-1, 1), regressed_slope)
+    X = np.array(random_intercept).reshape(-1, 1)
+    params = stat.linear_regression_params(X, random_slope)
     intercept = params['Coefficients'][0]
     slope = params['Coefficients'][1]
+    print(params)
 
-    plt.figure(0)
-    for x, y in zip(regressed_baseline, regressed_slope):
-        if np.random.rand() < 0.01:
-            plt.scatter(x, y)
-    predicted_slope = regressed_baseline * slope + intercept
-    plt.plot(regressed_baseline, predicted_slope)
+    prediction = stat.lr_prediction
+    plt.plot(X, prediction)
+
     plt.xlabel('random intercept (baseline status)')
     plt.ylabel('random slope (rate of change)')
-    plt.xlim([np.min(regressed_baseline), np.max(regressed_baseline)])
-    plt.ylim([np.min(predicted_slope), np.max(predicted_slope)])
+    plt.xlim([np.min(np.array(random_intercept)), np.max(np.array(random_intercept))])
+    # plt.ylim([min(random_slope)], max(random_slope))
 
     plt.figure(1)
-    start = np.max(regressed_baseline)
+    per_year = np.average(pd_imputed_data['age_3'] - pd_imputed_data['age_2'])
+    start = max(random_intercept)
     time = np.linspace(0, 200, 500)
     for i in range(len(time)):
         if time[i] == 200:
             break
         t_slope = start * slope + intercept
-        end = start + t_slope * (time[i+1] - time[i])
+        end = start + t_slope * (time[i+1] - time[i]) / per_year
         if (start - end) / start < 1e-05:
             break
         plt.plot([time[i], time[i+1]], [start, end], 'black')
         plt.xlabel('time/year')
-        plt.ylabel('GMV after regressing out covariates')
+        plt.ylabel('GMV')
         plt.title('Progression of GMV')
         start = end
     plt.show()
