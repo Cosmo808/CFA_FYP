@@ -85,7 +85,43 @@ if __name__ == "__main__":
     regressed_gmv = pd_ex_data['gmv'] - (fixed_age_slope * pd_ex_data['age'] + fixed_sex_slope * pd_ex_data['sex']
                                          + fixed_eth_slope * pd_ex_data['ethnicity'])
 
-    pd_ex_data['reg_gmv'] = regressed_gmv
-    me_model = smf.mixedlm('reg_gmv ~ time_point', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~time_point')
-    me_model = me_model.fit(method=['lbfgs', 'cg'])
-    print(me_model.summary())
+    len_index = len(pd_index.to_numpy())
+    pd_imputed_data['reg_gmv_0'] = regressed_gmv[:len_index]
+    pd_imputed_data['reg_gmv_1'] = regressed_gmv[len_index:]
+    # print(pd_imputed_da  ta)
+
+    regressed_baseline = pd_imputed_data['reg_gmv_0']
+    per_year = np.average(pd_imputed_data['age_3'] - pd_imputed_data['age_2'])
+    regressed_slope = (pd_imputed_data['reg_gmv_1'] - pd_imputed_data['reg_gmv_0']) / per_year
+
+    params = stat.linear_regression_params(regressed_baseline.to_numpy().reshape(-1, 1), regressed_slope)
+    intercept = params['Coefficients'][0]
+    slope = params['Coefficients'][1]
+
+    plt.figure(0)
+    for x, y in zip(regressed_baseline, regressed_slope):
+        if np.random.rand() < 0.01:
+            plt.scatter(x, y)
+    predicted_slope = regressed_baseline * slope + intercept
+    plt.plot(regressed_baseline, predicted_slope)
+    plt.xlabel('random intercept (baseline status)')
+    plt.ylabel('random slope (rate of change)')
+    plt.xlim([np.min(regressed_baseline), np.max(regressed_baseline)])
+    plt.ylim([np.min(predicted_slope), np.max(predicted_slope)])
+
+    plt.figure(1)
+    start = np.max(regressed_baseline)
+    time = np.linspace(0, 200, 500)
+    for i in range(len(time)):
+        if time[i] == 200:
+            break
+        t_slope = start * slope + intercept
+        end = start + t_slope * (time[i+1] - time[i])
+        if (start - end) / start < 1e-05:
+            break
+        plt.plot([time[i], time[i+1]], [start, end], 'black')
+        plt.xlabel('time/year')
+        plt.ylabel('GMV after regressing out covariates')
+        plt.title('Progression of GMV')
+        start = end
+    plt.show()
