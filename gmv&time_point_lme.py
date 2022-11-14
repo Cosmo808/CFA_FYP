@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from pd_data_preprocess import Pandas_data
 from stat_utils import Stat_utils
-import impyute.imputation.cs.mice as mice
+from impyute.imputation.cs import mice
 import statsmodels.formula.api as smf
 from statsmodels.api import load
 
@@ -18,7 +18,7 @@ def save_np(file_name, np_array):
 
 if __name__ == "__main__":
     imputation_flag = False
-    lme_fit_flag = False
+    lme_fit_flag = True
     data = Pandas_data()
     stat = Stat_utils()
     pd_age = data.age.iloc[:, 2:4]
@@ -76,4 +76,3 @@ if __name__ == "__main__":
 
     me_model = load('model/gmv&time_point_lme_model/lme_model')
     print(me_model.summary())
-

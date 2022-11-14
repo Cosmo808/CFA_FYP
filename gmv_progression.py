@@ -93,7 +93,6 @@ if __name__ == "__main__":
     plt.xlabel('random intercept (baseline status)')
     plt.ylabel('random slope (rate of change)')
     plt.xlim([np.min(np.array(random_intercept)), np.max(np.array(random_intercept))])
-    # plt.ylim([min(random_slope)], max(random_slope))
 
     plt.figure(1)
     per_year = np.average(pd_imputed_data['age_3'] - pd_imputed_data['age_2'])
