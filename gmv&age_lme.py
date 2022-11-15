@@ -31,7 +31,7 @@ if __name__ == "__main__":
     pd_age_gmv_sex_eth = pd_age_gmv_sex_eth.dropna(subset=['sex'])    # 41766
     pd_age_gmv_sex_eth = pd_age_gmv_sex_eth.dropna(subset=['eth_0'])    # 41758
     pd_index = pd_age_gmv_sex_eth.index
-    print(pd_age_gmv_sex_eth)
+
     if imputation_flag:
         imputed_data = mice(pd_age_gmv_sex_eth.to_numpy())
         save_np('cov_imputation', imputed_data)
@@ -64,21 +64,17 @@ if __name__ == "__main__":
     pd_imputed_eth = pd_imputed_data['eth_0']
     ex_imputed_eth = pd.concat([pd_imputed_eth, pd_imputed_eth])
 
-    # expand time point
-    # time_point_0 = pd.DataFrame(data=np.zeros_like(pd_imputed_gmv_0.to_numpy()), index=pd_index, columns=['time_point'])
-    # time_point_1 = pd.DataFrame(data=np.ones_like(pd_imputed_gmv_1.to_numpy()), index=pd_index, columns=['time_point'])
-    # ex_time_point = pd.concat([time_point_0, time_point_1])
-
     # total expanded data
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_delta_age, ex_imputed_gmv,
                             ex_imputed_baseline_gmv, ex_imputed_sex, ex_imputed_eth], axis=1)
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
                                             'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
-
+    print(pd_ex_data)
     if lme_fit_flag:
-        me_model = smf.mixedlm('gmv ~ gmv_0 + delta_age + sex + ethnicity', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~age')
+        me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
+                               data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ gmv_0 + delta_age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
-        me_model.save('model/gmv&time_point_lme_model/lme_model')
+        me_model.save('model/gmv&age_lme_model/lme_model')
 
-    me_model = load('model/gmv&time_point_lme_model/lme_model')
+    me_model = load('model/gmv&age_lme_model/lme_model')
     print(me_model.summary())
