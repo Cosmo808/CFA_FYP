@@ -24,68 +24,80 @@ if __name__ == "__main__":
     pd_index = pd_age_gmv_sex_eth.index
 
     pd_filter_gmv_3 = pd_age_gmv_sex_eth.dropna(subset=['gmv_3'])
+    pd_filter_age_3 = pd_age_gmv_sex_eth.dropna(subset=['age_3'])
     pd_index_gmv_3 = pd_filter_gmv_3.index
-    cv_length = int(len(pd_index_gmv_3) / 10)
+    pd_index_age_3 = pd_filter_age_3.index
+    cv_gmv_length = int(len(pd_index_gmv_3) / 10)
+    cv_age_length = int(len(pd_index_age_3) / 10)
 
-    gmv_rmse_0 = []
-    age_rmse_0 = []
-    gmv_rmse_1 = []
-    age_rmse_1 = []
+    gmv_rmse = []
+    age_rmse = []
+    both_gmv_rmse = []
+    both_age_rmse = []
+
     for i in range(10):
         if i == 9:
-            cv_index = pd_index_gmv_3[(i * cv_length):]
+            cv_gmv_index = pd_index_gmv_3[(i * cv_gmv_length):]
+            cv_age_index = pd_index_age_3[(i * cv_age_length):]
         else:
-            cv_index = pd_index_gmv_3[(i * cv_length):((i + 1) * cv_length)]
+            cv_gmv_index = pd_index_gmv_3[(i * cv_gmv_length):((i + 1) * cv_gmv_length)]
+            cv_age_index = pd_index_age_3[(i * cv_age_length):((i + 1) * cv_age_length)]
 
         gmv_3 = pd_filter_gmv_3['gmv_3']
         age_3 = pd_filter_gmv_3['age_3']
-        test_gmv_3 = gmv_3.filter(items=cv_index, axis=0)
-        test_age_3 = age_3.filter(items=cv_index, axis=0)
+        test_gmv_3 = gmv_3.filter(items=cv_gmv_index, axis=0)
+        test_age_3 = age_3.filter(items=cv_age_index, axis=0)
 
-        train_gmv_3 = pd_age_gmv_sex_eth['gmv_3']
-        train_gmv_3.loc[cv_index] = float('nan')
-        train_age_3 = pd_age_gmv_sex_eth['age_3']
-        train_age_3.loc[cv_index] = float('nan')
+        train_gmv_3 = pd_age_gmv_sex_eth['gmv_3'].copy()
+        train_gmv_3.loc[cv_gmv_index] = float('nan')
+        train_age_3 = pd_age_gmv_sex_eth['age_3'].copy()
+        train_age_3.loc[cv_age_index] = float('nan')
 
-        # age_2, age_3, gmv_2, gmv_3
-        train_data = pd.concat([pd_age_gmv_sex_eth['age_2'], train_age_3,
-                                pd_age_gmv_sex_eth['gmv_2'], train_gmv_3], axis=1)
-
+        # only remove gmv
+        train_data = pd.concat([pd_age_gmv_sex_eth['age_2'], pd_age_gmv_sex_eth['age_3'],
+                                pd_age_gmv_sex_eth['gmv_2'], train_gmv_3,
+                                pd_age_gmv_sex_eth['sex'], pd_age_gmv_sex_eth['eth_0']], axis=1)
         imputed_result = mice(train_data.to_numpy())
-        print(imputed_result)
-        imputed_data = pd.DataFrame(data=imputed_result, index=pd_index, columns=['age_2', 'age_3', 'gmv_2', 'gmv_3'])
+        imputed_data = pd.DataFrame(data=imputed_result, index=pd_index,
+                                    columns=['age_2', 'age_3', 'gmv_2', 'gmv_3', 'sex', 'eth_0'])
+
         gmv_3 = imputed_data['gmv_3']
+        pred_gmv_3 = gmv_3.filter(items=cv_gmv_index, axis=0)
+        gmv_rmse.append(mse(test_gmv_3, pred_gmv_3, squared=False))
+
+        # only remove age
+        train_data = pd.concat([pd_age_gmv_sex_eth['age_2'], train_age_3,
+                                pd_age_gmv_sex_eth['gmv_2'], pd_age_gmv_sex_eth['gmv_3'],
+                                pd_age_gmv_sex_eth['sex'], pd_age_gmv_sex_eth['eth_0']], axis=1)
+        imputed_result = mice(train_data.to_numpy())
+        imputed_data = pd.DataFrame(data=imputed_result, index=pd_index,
+                                    columns=['age_2', 'age_3', 'gmv_2', 'gmv_3', 'sex', 'eth_0'])
+
         age_3 = imputed_data['age_3']
-        pred_gmv_3 = gmv_3.filter(items=cv_index, axis=0)
-        pred_age_3 = age_3.filter(items=cv_index, axis=0)
+        pred_age_3 = age_3.filter(items=cv_age_index, axis=0)
+        age_rmse.append(mse(test_age_3, pred_age_3, squared=False))
 
-        gmv_rmse_0.append(mse(test_gmv_3, pred_gmv_3, squared=False))
-        age_rmse_0.append(mse(test_age_3, pred_age_3, squared=False))
-
-        # age_2, age_3, gmv_2, gmv_3, sex, eth
+        # remove both gmv and age
         train_data = pd.concat([pd_age_gmv_sex_eth['age_2'], train_age_3,
                                 pd_age_gmv_sex_eth['gmv_2'], train_gmv_3,
                                 pd_age_gmv_sex_eth['sex'], pd_age_gmv_sex_eth['eth_0']], axis=1)
-
         imputed_result = mice(train_data.to_numpy())
-        print(imputed_result)
         imputed_data = pd.DataFrame(data=imputed_result, index=pd_index,
                                     columns=['age_2', 'age_3', 'gmv_2', 'gmv_3', 'sex', 'eth_0'])
+
         gmv_3 = imputed_data['gmv_3']
+        pred_gmv_3 = gmv_3.filter(items=cv_gmv_index, axis=0)
+        both_gmv_rmse.append(mse(test_gmv_3, pred_gmv_3, squared=False))
         age_3 = imputed_data['age_3']
-        pred_gmv_3 = gmv_3.filter(items=cv_index, axis=0)
-        pred_age_3 = age_3.filter(items=cv_index, axis=0)
+        pred_age_3 = age_3.filter(items=cv_age_index, axis=0)
+        both_age_rmse.append(mse(test_age_3, pred_age_3, squared=False))
 
-        gmv_rmse_1.append(mse(test_gmv_3, pred_gmv_3, squared=False))
-        age_rmse_1.append(mse(test_age_3, pred_age_3, squared=False))
-        break
+    print('######## GMV Imputation ########')
+    print('RMSE of GMV: ', np.round(gmv_rmse, 3), '\n')
 
-    print('######## GMV, age ########')
-    print('RMSE of GMV: ', np.round(gmv_rmse_0, 3))
-    print('RMSE of age: ', np.round(age_rmse_0, 3), '\n')
+    print('######## Age Imputation ########')
+    print('RMSE of age: ', np.round(age_rmse, 3), '\n')
 
-    print('######## GMV, age, sex, eth ########')
-    print('RMSE of GMV: ', np.round(gmv_rmse_1, 3))
-    print('RMSE of age: ', np.round(age_rmse_1, 3), '\n')
-
-
+    print('######## GMV & Age Imputation ########')
+    print('RMSE of GMV: ', np.round(both_gmv_rmse, 3))
+    print('RMSE of age: ', np.round(both_age_rmse, 3), '\n')
