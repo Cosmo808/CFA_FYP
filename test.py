@@ -23,4 +23,4 @@ def save_np(file_name, np_array):
 
 if __name__ == "__main__":
     a=[1.3411341, 2.31432152, 3.3412521]
-    print(np.round(a, 3))
+    print(np.sum(np.power(a, 2)))
