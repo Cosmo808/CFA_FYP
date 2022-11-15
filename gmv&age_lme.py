@@ -18,7 +18,7 @@ def save_np(file_name, np_array):
 
 if __name__ == "__main__":
     imputation_flag = False
-    lme_fit_flag = False
+    lme_fit_flag = True
     data = Pandas_data()
     stat = Stat_utils()
     pd_age = data.age.iloc[:, 2:4]
@@ -72,11 +72,11 @@ if __name__ == "__main__":
     # total expanded data
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_delta_age, ex_imputed_gmv,
                             ex_imputed_baseline_gmv, ex_imputed_sex, ex_imputed_eth], axis=1)
-    pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'age - age_0', 2: 'gmv',
+    pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
                                             'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
 
     if lme_fit_flag:
-        me_model = smf.mixedlm('gmv ~ gmv_0 + age - age_0 + sex + ethnicity', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~age')
+        me_model = smf.mixedlm('gmv ~ gmv_0 + delta_age + sex + ethnicity', data=pd_ex_data, groups=pd_ex_data.index, re_formula='~age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
         me_model.save('model/gmv&time_point_lme_model/lme_model')
 

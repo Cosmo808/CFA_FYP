@@ -71,6 +71,7 @@ if __name__ == "__main__":
 
         gmv_3 = imputed_data['gmv_3']
         pred_gmv_3 = gmv_3.filter(items=cv_gmv_index, axis=0)
+
         gmv_rmse.append(mse(test_gmv_3, pred_gmv_3, squared=False))
         gmv_rrmse.append(rrmse(test_gmv_3, pred_gmv_3))
 
@@ -84,6 +85,7 @@ if __name__ == "__main__":
 
         age_3 = imputed_data['age_3']
         pred_age_3 = age_3.filter(items=cv_age_index, axis=0)
+
         age_rmse.append(mse(test_age_3, pred_age_3, squared=False))
         age_rrmse.append(rrmse(test_age_3, pred_age_3))
 
@@ -97,11 +99,14 @@ if __name__ == "__main__":
 
         gmv_3 = imputed_data['gmv_3']
         pred_gmv_3 = gmv_3.filter(items=cv_gmv_index, axis=0)
-        gmv_rmse.append(mse(test_gmv_3, pred_gmv_3, squared=False))
+
+        both_gmv_rmse.append(mse(test_gmv_3, pred_gmv_3, squared=False))
         both_gmv_rrmse.append(rrmse(test_gmv_3, pred_gmv_3))
+
         age_3 = imputed_data['age_3']
         pred_age_3 = age_3.filter(items=cv_age_index, axis=0)
-        age_rmse.append(mse(test_age_3, pred_age_3, squared=False))
+
+        both_age_rmse.append(mse(test_age_3, pred_age_3, squared=False))
         both_age_rrmse.append(rrmse(test_age_3, pred_age_3))
 
     print('######## GMV Imputation ########')
