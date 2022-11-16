@@ -71,14 +71,16 @@ if __name__ == "__main__":
 
     plt.figure(0)
     me_model = load('model/gmv&age_lme_model/lme_model')
-    random_effects = list(me_model.random_effects.items())
-    random_intercept = []
-    random_slope_gmv = []
-    random_slope_delta_age = []
+    # random_effects = list(me_model.random_effects.items())
+    # random_intercept = []
+    # random_slope_delta_age = []
+    #
+    # for result in random_effects:
+    #     random_intercept.append(result[1]['Group'])
+    #     random_slope_delta_age.append((result[1]['delta_age']))
 
-    for result in random_effects:
-        random_intercept.append(result[1]['Group'])
-        random_slope_gmv.append(result[1]['gmv_0'])
-        random_slope_delta_age.append((result[1]['delta_age']))
+    # print(me_model.summary())
+    print(me_model.random_effects_cov)
+    print(me_model.params)
 
 

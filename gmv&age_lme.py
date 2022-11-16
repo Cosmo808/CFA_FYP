@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # print(pd_ex_data)
     if lme_fit_flag:
         me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
-                               data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ gmv_0 + delta_age')
+                               data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
         me_model.save('model/gmv&age_lme_model/lme_model')
 
