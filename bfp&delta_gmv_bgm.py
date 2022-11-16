@@ -3,7 +3,7 @@ import matplotlib.cm as cm
 import numpy as np
 from np_data_preprocess import Numpy_data
 from va_baye_gaus_mix import BGM
-from plot_utils import Plot_utils
+from plot_utils import confidence_ellipse
 
 if __name__ == "__main__":
     # hyperparameter
@@ -15,7 +15,6 @@ if __name__ == "__main__":
     fit_flag = False
     data = Numpy_data()
     bgm = BGM(n_components, prior, max_iter, tol)
-    plot = Plot_utils()
 
     pairwise_age, pairwise_bfp, pairwise_bmi, pairwise_gmv = data.pairwise_data()
     single_age, single_bfp, single_bmi, single_gmv = data.single_point_data()
@@ -52,8 +51,8 @@ if __name__ == "__main__":
     for i in range(len(means)):
         mean = means[i]
         cov = covariances[i]
-        pearson = plot.confidence_ellipse(cov, mean, ax, facecolor=colors[i],
-                                          alpha=color_transparency_weight[i], label=i)
+        pearson = confidence_ellipse(cov, mean, ax, facecolor=colors[i],
+                                     alpha=color_transparency_weight[i], label=i)
         pearson_corr.append(pearson)
         ax.legend()
 

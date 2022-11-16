@@ -4,7 +4,7 @@ import statsmodels.formula.api as smf
 from pd_data_preprocess import Pandas_data
 from va_baye_gaus_mix import BGM
 from stat_utils import Stat_utils
-from plot_utils import Plot_utils
+from plot_utils import gaussian_distribution
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import math
@@ -21,7 +21,6 @@ if __name__ == "__main__":
     data = Pandas_data()
     bgm = BGM(n_components, prior, max_iter, tol)
     stat = Stat_utils()
-    plot = Plot_utils()
 
     pd_age_0 = data.age.iloc[:, 2]
     pd_bfp_0_1 = data.bfp.iloc[:, 2:4]
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     for mean, var, i in zip(means, variances, range(len(means))):
         mu = mean
         sigma = math.sqrt(var)
-        plot.gaussian_distribution(ax, mu, sigma, color=colors[i], alpha=color_transparency_weight[i], label=i)
+        gaussian_distribution(ax, mu, sigma, color=colors[i], alpha=color_transparency_weight[i], label=i)
         ax.legend()
 
     fig, axs = plt.subplots(2, 1)
