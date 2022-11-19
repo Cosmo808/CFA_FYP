@@ -9,7 +9,7 @@ class Prog_feat_extract:
         self.data = data
         self.prog_extract_data = data
 
-        self.sample_num = sample_rate * len(data.index)
+        self.sample_num = int(sample_rate * len(data.index))
         self.neighbor_num = neighbor_num
         self.convergence = convergence
         self.max_iter = max_iterations
@@ -53,7 +53,7 @@ class Prog_feat_extract:
 
             self.data = self.data.drop(neighbor_index)
             self.data = self.data.append(neighbor_centroid)
-            if i % 10 == 1:
+            if i % 50 == 1:
                 print('######## Progressing: {}% ({} / {})'.format(np.round(i / self.sample_num * 100, 2), i, self.sample_num))
                 print('######## Number of data: {}'.format(len(self.data.index)))
         self.prog_extract_data = pd.concat([self.prog_extract_data, self.data], axis=1)
