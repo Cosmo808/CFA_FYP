@@ -1,19 +1,11 @@
-import numpy as np
-import pandas as pd
+from progression_feature_extraction import Prog_feat_extract
 from pd_data_preprocess import Pandas_data
-from va_baye_gaus_mix import BGM
 from stat_utils import Stat_utils
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from collections import Counter
-import math
-import os
 from statsmodels.api import load
 import impyute.imputation.cs.mice as mice
-import statsmodels.formula.api as smf
-from scipy import spatial
-from scipy.special import comb
-from progression_feature_extraction import Prog_feat_extract
+import numpy as np
+import pandas as pd
+import os
 
 
 def save_np(file_name, np_array):
@@ -89,7 +81,6 @@ if __name__ == "__main__":
 
     data = pd.concat([pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1], axis=1)
     data = data.rename(columns={'age_2': 0, 'age_3': 1, 0: 2, 1: 3})
-    index_data = data.index
+
     prog = Prog_feat_extract(data, 1e-3, 50, 1e-7, 1000)
     prog.prog_iter(threshold=100)
-

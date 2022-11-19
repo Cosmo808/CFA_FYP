@@ -53,11 +53,10 @@ class Prog_feat_extract:
 
             self.data = self.data.drop(neighbor_index)
             self.data = self.data.append(neighbor_centroid)
-            if i % 5 == 1:
+            if i % 10 == 1:
                 print('######## Progressing: {}% ({} / {})'.format(np.round(i / sample_num * 100, 2), i, sample_num))
                 print('######## Number of data: {}'.format(len(self.data.index)))
         self.prog_extract_data = pd.concat([self.prog_extract_data, self.data], axis=1)
-        print(self.prog_extract_data)
 
     def minimize_error(self, center, neighbor_d):
         center_x_0 = center[0]
@@ -69,6 +68,8 @@ class Prog_feat_extract:
         num = len(index)
         all_list = np.arange(num)
         iter_cnt = 0
+        last_error = 0
+        last_list = []
 
         while num > 0:
             if num == 1:
@@ -125,7 +126,13 @@ class Prog_feat_extract:
                         all_list = last_list
 
     def prog_iter(self, threshold):
+        iteration = 0
         while True:
+            print('\n###################################\n########## Iteration {:^3} ##########\n'
+                  '###################################'.format(iteration))
             self.prog_extract()
-            if len(self.prog_extract_data.columns) / 4 < threshold:
+            self.data.to_csv(path_or_buf='data/prog_feature_extract/iter_{}.csv'.format(iteration))
+            iteration += 1
+            if len(self.data.index) < threshold:
+                self.prog_extract_data.to_csv(path_or_buf='data/prog_feature_extract/all_data.csv')
                 break
