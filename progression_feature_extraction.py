@@ -82,7 +82,7 @@ class Prog_feat_extract:
                 -select_neighbor ** 2 / (2 * (select_neighbor.max() - select_neighbor.min()) ** 2)
             ) / num
 
-            neighbor_point = self.data.filter(items=select_index, axis=0)
+            neighbor_point = self.data.filter(items=select_index, axis=0).copy()
             neighbor_centroid_x_0 = np.sum(neighbor_point.iloc[:, 0] * neighbor_weight)
             neighbor_centroid_x_1 = np.sum(neighbor_point.iloc[:, 1] * neighbor_weight)
             neighbor_centroid_y_0 = np.sum(neighbor_point.iloc[:, 2] * neighbor_weight)
