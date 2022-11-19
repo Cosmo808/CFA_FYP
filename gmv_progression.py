@@ -116,4 +116,7 @@ if __name__ == "__main__":
     plt.xlim([45, 85])
     plt.ylim([0.9e+6, 1.2e+6])
 
+    for iteration in range(100):
+        data = pd.read_csv('data/prog_feature_extract/iter_{}.csv'.format(iteration))
+
     plt.show()

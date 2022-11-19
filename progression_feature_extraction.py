@@ -91,8 +91,12 @@ class Prog_feat_extract:
             center_vec = [center_x_1 - center_x_0, center_y_1 - center_y_0]
             neighbor_vec = [neighbor_centroid_x_1 - neighbor_centroid_x_0,
                             neighbor_centroid_y_1 - neighbor_centroid_y_0]
-            cos = (center_vec[0] * neighbor_vec[0] + center_vec[1] * neighbor_vec[1]) / \
-                  ((center_vec[0] ** 2 + center_vec[1] ** 2) * (neighbor_vec[0] ** 2 + neighbor_vec[1] ** 2)) ** 0.5
+            if (center_vec[0] ** 2 + center_vec[1] ** 2) * (neighbor_vec[0] ** 2 + neighbor_vec[1] ** 2) == 0:
+                cos = 0
+                print(center_vec, neighbor_vec)
+            else:
+                cos = (center_vec[0] * neighbor_vec[0] + center_vec[1] * neighbor_vec[1]) / \
+                      ((center_vec[0] ** 2 + center_vec[1] ** 2) * (neighbor_vec[0] ** 2 + neighbor_vec[1] ** 2)) ** 0.5
 
             if (1 - cos) < self.convergence:
                 neighbor_centroid = pd.DataFrame(
