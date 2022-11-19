@@ -17,7 +17,6 @@ def save_np(file_name, np_array):
 
 
 if __name__ == "__main__":
-    imputation_flag = False
     lme_fit_flag = True
     data = Pandas_data()
     stat = Stat_utils()
@@ -32,9 +31,6 @@ if __name__ == "__main__":
     pd_age_gmv_sex_eth = pd_age_gmv_sex_eth.dropna(subset=['eth_0'])    # 41758
     pd_index = pd_age_gmv_sex_eth.index
 
-    if imputation_flag:
-        imputed_data = mice(pd_age_gmv_sex_eth.to_numpy())
-        save_np('cov_imputation', imputed_data)
     imputed_data = np.load('data/age_gmv_imputation/cov_imputation.npy')
     pd_imputed_data = pd.DataFrame(data=imputed_data, index=pd_index,
                                    columns=['age_2', 'age_3', 'gmv_2', 'gmv_3', 'sex', 'eth_0'])
@@ -70,14 +66,6 @@ if __name__ == "__main__":
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
                                             'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
     # print(pd_ex_data)
-    # if lme_fit_flag:
-    #     me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
-    #                            data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
-    #     me_model = me_model.fit(method=['lbfgs', 'cg'])
-    #     me_model.save('model/gmv&age_lme_model/lme_model')
-    #
-    # me_model = load('model/gmv&age_lme_model/lme_model')
-
     if lme_fit_flag:
         me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
                                data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
