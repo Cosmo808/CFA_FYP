@@ -82,5 +82,5 @@ if __name__ == "__main__":
     data = pd.concat([pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1], axis=1)
     data = data.rename(columns={'age_2': 0, 'age_3': 1, 0: 2, 1: 3})
 
-    prog = Prog_feat_extract(data, 1e-3, 50, 1e-7, 1000)
-    prog.prog_iter(threshold=100)
+    prog = Prog_feat_extract(data, 1e-2, 50, 1e-7, 1000)
+    prog.prog_iter(threshold=1000)

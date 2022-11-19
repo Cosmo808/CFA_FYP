@@ -9,19 +9,18 @@ class Prog_feat_extract:
         self.data = data
         self.prog_extract_data = data
 
-        self.sample_rate = sample_rate
+        self.sample_num = sample_rate * len(data.index)
         self.neighbor_num = neighbor_num
         self.convergence = convergence
         self.max_iter = max_iterations
 
     def prog_extract(self):
         index = self.data.index
-        sample_num = int(self.sample_rate * len(index))
         sample_permutation = np.random.permutation(np.arange(len(index)))
-        sample_index = index[sample_permutation[:sample_num]]
+        sample_index = index[sample_permutation[:self.sample_num]]
         sample_point = self.data.filter(items=sample_index, axis=0)
-        print('######## Sample number: {} ########'.format(sample_num))
-        for i in range(sample_num):
+        print('######## Sample number: {} ########'.format(self.sample_num))
+        for i in range(self.sample_num):
             center = sample_point.iloc[i, :]
             center_x_0 = center[0]
             center_x_1 = center[1]
@@ -55,7 +54,7 @@ class Prog_feat_extract:
             self.data = self.data.drop(neighbor_index)
             self.data = self.data.append(neighbor_centroid)
             if i % 10 == 1:
-                print('######## Progressing: {}% ({} / {})'.format(np.round(i / sample_num * 100, 2), i, sample_num))
+                print('######## Progressing: {}% ({} / {})'.format(np.round(i / self.sample_num * 100, 2), i, self.sample_num))
                 print('######## Number of data: {}'.format(len(self.data.index)))
         self.prog_extract_data = pd.concat([self.prog_extract_data, self.data], axis=1)
 
