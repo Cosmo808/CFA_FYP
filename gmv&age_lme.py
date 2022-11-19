@@ -70,6 +70,14 @@ if __name__ == "__main__":
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
                                             'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
     # print(pd_ex_data)
+    # if lme_fit_flag:
+    #     me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
+    #                            data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
+    #     me_model = me_model.fit(method=['lbfgs', 'cg'])
+    #     me_model.save('model/gmv&age_lme_model/lme_model')
+    #
+    # me_model = load('model/gmv&age_lme_model/lme_model')
+
     if lme_fit_flag:
         me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
                                data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
