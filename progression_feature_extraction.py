@@ -39,11 +39,11 @@ class Prog_feat_extract:
             neighbor_index = neighbor_d.index
 
             # no neighbor
-            if len(neighbor_index) == 1:
+            neighbor_len = len(neighbor_index)
+            if neighbor_len <= 1:
                 continue
 
             # if exceed maximum, select nearest points
-            neighbor_len = len(neighbor_index)
             if neighbor_len > self.neighbor_num:
                 neighbor_len = self.neighbor_num
                 neighbor_d = neighbor_d.nsmallest(neighbor_len)
@@ -73,7 +73,7 @@ class Prog_feat_extract:
 
         while num > 0:
             if num == 1:
-                return index, center
+                return index[0], center
             select_list = all_list[:num]
             select_index = index[select_list]
             select_neighbor = neighbor_d.filter(items=select_index, axis=0)
