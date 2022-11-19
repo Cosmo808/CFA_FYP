@@ -84,3 +84,4 @@ if __name__ == "__main__":
 
     prog = Prog_feat_extract(data, 1e-2, 50, 1e-7, 1000)
     prog.prog_iter(threshold=1000)
+    prog.prog_extract()

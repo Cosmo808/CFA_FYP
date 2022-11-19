@@ -73,7 +73,7 @@ class Prog_feat_extract:
 
         while num > 0:
             if num == 1:
-                return index[0], center
+                return center.name, center
             select_list = all_list[:num]
             select_index = index[select_list]
             select_neighbor = neighbor_d.filter(items=select_index, axis=0)
@@ -82,8 +82,7 @@ class Prog_feat_extract:
                 -select_neighbor ** 2 / (2 * (select_neighbor.max() - select_neighbor.min()) ** 2)
             ) / num
 
-            all_data = self.data.copy()
-            neighbor_point = all_data.filter(items=select_index, axis=0)
+            neighbor_point = self.data.filter(items=select_index, axis=0)
             neighbor_centroid_x_0 = np.sum(neighbor_point.iloc[:, 0] * neighbor_weight)
             neighbor_centroid_x_1 = np.sum(neighbor_point.iloc[:, 1] * neighbor_weight)
             neighbor_centroid_y_0 = np.sum(neighbor_point.iloc[:, 2] * neighbor_weight)
