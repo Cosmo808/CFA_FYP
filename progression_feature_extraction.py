@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from scipy.special import comb
 
 
@@ -130,6 +131,8 @@ class Prog_feat_extract:
                         all_list = last_list
 
     def prog_iter(self, threshold):
+        if not os.path.exists('data/prog_feature_extract'):
+            os.makedirs('data/prog_feature_extract')
         iteration = 0
         while True:
             print('\n###################################\n########## Iteration {:^3} ##########\n'

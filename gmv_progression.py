@@ -117,6 +117,15 @@ if __name__ == "__main__":
     plt.ylim([0.9e+6, 1.2e+6])
 
     for iteration in range(100):
+        plt.figure(iteration + 2)
         data = pd.read_csv('data/prog_feature_extract/iter_{}.csv'.format(iteration))
+        for age_0, age_1, gmv_0, gmv_1 in zip(data.iloc[:, 0], data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]):
+            if np.random.rand() < 500 / len(data.index):
+                plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
+        plt.title('GMV progression after extraction', fontsize=15)
+        plt.xlabel('Age / year', fontsize=15)
+        plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
+        plt.xlim([45, 85])
+        plt.ylim([0.9e+6, 1.2e+6])
 
     plt.show()
