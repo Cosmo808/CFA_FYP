@@ -4,13 +4,14 @@ from scipy.special import comb
 
 
 class Prog_feat_extract:
-    def __init__(self, data, sample_rate, neighbor_num, convergence):
+    def __init__(self, data, sample_rate, neighbor_num, convergence, max_iterations):
         self.data = data
         self.prog_extract_data = data
 
         self.sample_rate = sample_rate
         self.neighbor_num = neighbor_num
         self.convergence = convergence
+        self.max_iter = max_iterations
 
     def prog_extract(self):
         index = self.data.index
@@ -18,7 +19,7 @@ class Prog_feat_extract:
         sample_permutation = np.random.permutation(np.arange(len(index)))
         sample_index = index[sample_permutation[:sample_num]]
         sample_point = self.data.filter(items=sample_index, axis=0)
-
+        print('######## Sample number: {} ########'.format(sample_num))
         for i in range(sample_num):
             center = sample_point.iloc[i, :]
             center_x_0 = center[0]
@@ -52,6 +53,9 @@ class Prog_feat_extract:
 
             self.data = self.data.drop(neighbor_index)
             self.data = self.data.append(neighbor_centroid)
+            if i % 5 == 1:
+                print('######## Progressing: {}% ({} / {})'.format(np.round(i / sample_num * 100, 2), i, sample_num))
+                print('######## Number of data: {}'.format(len(self.data.index)))
         self.prog_extract_data = pd.concat([self.prog_extract_data, self.data], axis=1)
         print(self.prog_extract_data)
 
@@ -67,6 +71,8 @@ class Prog_feat_extract:
         iter_cnt = 0
 
         while num > 0:
+            if num == 1:
+                return index, center
             select_list = all_list[:num]
             select_index = index[select_list]
             select_neighbor = neighbor_d.filter(items=select_index, axis=0)
@@ -95,7 +101,7 @@ class Prog_feat_extract:
                 return select_index, neighbor_centroid
             else:
                 iter_cnt += 1
-                if iter_cnt >= min(10000, comb(len(index), num)):
+                if iter_cnt >= min(self.max_iter, comb(len(index), num)):
                     iter_cnt = 0
                     num -= 1
                     continue
