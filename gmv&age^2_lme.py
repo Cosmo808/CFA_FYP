@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from pd_data_preprocess import Pandas_data
 from stat_utils import Stat_utils
-from impyute.imputation.cs import mice
 import statsmodels.formula.api as smf
 from statsmodels.api import load
 
@@ -75,10 +74,10 @@ if __name__ == "__main__":
                                    + params['age'] * pd_ex_data['age'])
 
     data = pd.concat([pd_ex_data['age'], pd_ex_data['gmv'], pd_ex_data['age'] ** 2], axis=1)
-    data = data.set_axis([*data.columns[:-1], 'age2'], axis=1, inplace=False)
+    data = data.set_axis([*data.columns[:-1], 'age_2'], axis=1, inplace=False)
     print(data)
     if lme_fit_flag:
-        me_model = smf.mixedlm('gmv ~ age2',
+        me_model = smf.mixedlm('gmv ~ age_2 + age',
                                data=data, groups=data.index, re_formula='~ age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
         me_model.save('model/gmv&age_lme_model/age^2_lme_model')

@@ -1,7 +1,6 @@
 from pd_data_preprocess import Pandas_data
 from stat_utils import Stat_utils
 import matplotlib.pyplot as plt
-import impyute.imputation.cs.mice as mice
 from statsmodels.api import load
 import numpy as np
 import pandas as pd
@@ -75,53 +74,78 @@ if __name__ == "__main__":
     reg_gmv_0 = reg_gmv.iloc[:int(len(reg_gmv) / 2)]
     reg_gmv_1 = reg_gmv.iloc[int(len(reg_gmv) / 2):]
 
-    plt.figure(0)
-    corr = params['Group x delta_age Cov'] / (params['Group Var'] * params['delta_age Var']) ** 0.5
-    random_effects = list(me_model.random_effects.items())
-    random_intercept = []
-    random_slope_delta_age = []
-
-    for result in random_effects:
-        x = result[1]['Group']
-        y = result[1]['delta_age']
-        random_intercept.append(x)
-        random_slope_delta_age.append(y)
-        if np.random.rand() < 0.05:
-            plt.scatter(x, y, alpha=np.random.rand())
-    plt.title('Correlation between random coefficients', fontsize=15)
-    plt.xlabel('random intercept (baseline status)', fontsize=15)
-    plt.ylabel('random slope (rate of change per year)', fontsize=15)
-    plt.xlim([-170000, 170000])
-    plt.ylim([-5000, 5000])
-    plt.annotate('Pearson Correlation = {}'.format(np.round(corr, 3)), xy=(1, 0), xycoords='axes fraction',
-                 horizontalalignment='right', verticalalignment='bottom', fontsize=15)
-
-    linear_params = stat.linear_regression_params(np.array(random_intercept).reshape(-1, 1), random_slope_delta_age)
-    pred_slope = stat.lr_prediction
-    plt.plot(random_intercept, pred_slope, 'purple', linewidth=6, alpha=0.7)
-    plt.plot([-170000, 170000], [0, 0], '--', color='black', alpha=0.5)
-    plt.plot([0, 0], [-5000, 5000], '--', color='black', alpha=0.5)
+    # plt.figure(0)
+    # corr = params['Group x delta_age Cov'] / (params['Group Var'] * params['delta_age Var']) ** 0.5
+    # random_effects = list(me_model.random_effects.items())
+    # random_intercept = []
+    # random_slope_delta_age = []
+    #
+    # for result in random_effects:
+    #     x = result[1]['Group']
+    #     y = result[1]['delta_age']
+    #     random_intercept.append(x)
+    #     random_slope_delta_age.append(y)
+    #     if np.random.rand() < 0.05:
+    #         plt.scatter(x, y, alpha=np.random.rand())
+    # plt.title('Correlation between random coefficients', fontsize=15)
+    # plt.xlabel('random intercept (baseline status)', fontsize=15)
+    # plt.ylabel('random slope (rate of change per year)', fontsize=15)
+    # plt.xlim([-170000, 170000])
+    # plt.ylim([-5000, 5000])
+    # plt.annotate('Pearson Correlation = {}'.format(np.round(corr, 3)), xy=(1, 0), xycoords='axes fraction',
+    #              horizontalalignment='right', verticalalignment='bottom', fontsize=15)
+    #
+    # linear_params = stat.linear_regression_params(np.array(random_intercept).reshape(-1, 1), random_slope_delta_age)
+    # pred_slope = stat.lr_prediction
+    # plt.plot(random_intercept, pred_slope, 'purple', linewidth=6, alpha=0.7)
+    # plt.plot([-170000, 170000], [0, 0], '--', color='black', alpha=0.5)
+    # plt.plot([0, 0], [-5000, 5000], '--', color='black', alpha=0.5)
 
     plt.figure(1)
     for age_0, age_1, gmv_0, gmv_1 in zip(pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1):
         if np.random.rand() < 0.05:
             plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
+
+    # global trajectory
+    me_model = load('model/gmv&age_lme_model/age^2_lme_model')\
+
+    random_effects = list(me_model.random_effects.items())
+    random_intercept = []
+    random_slope = []
+    for result in random_effects:
+        x = result[1]['Group']
+        y = result[1]['age']
+        random_intercept.append(x)
+        random_slope.append(y)
+
+    print(me_model.params)
+    params = me_model.summary().tables[1].iloc[:, 0]
+    print(params)
+    print(np.average(random_intercept), np.average(random_slope))
+    c = me_model.params['Intercept'] + np.average(random_intercept)
+    b = np.average(random_slope)
+    a = me_model.params['age_2']
+    x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
+    y = a * (x ** 2) + b * x + c
+    print(a,b,c)
+    plt.plot(x, y, 'purple', linewidth=6, alpha=0.7)
+
     plt.title('GMV progression across age', fontsize=15)
     plt.xlabel('Age / year', fontsize=15)
     plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
-    plt.xlim([45, 85])
-    plt.ylim([0.9e+6, 1.2e+6])
+    # plt.xlim([45, 85])
+    # plt.ylim([0.9e+6, 1.2e+6])
 
-    for iteration in range(100):
-        plt.figure(iteration + 2)
-        data = pd.read_csv('data/prog_feature_extract/iter_{}.csv'.format(iteration))
-        for age_0, age_1, gmv_0, gmv_1 in zip(data.iloc[:, 0], data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]):
-            if np.random.rand() < 500 / len(data.index):
-                plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
-        plt.title('GMV progression after extraction', fontsize=15)
-        plt.xlabel('Age / year', fontsize=15)
-        plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
-        plt.xlim([45, 85])
-        plt.ylim([0.9e+6, 1.2e+6])
+    # for iteration in range(100):
+    #     plt.figure(iteration + 2)
+    #     data = pd.read_csv('data/prog_feature_extract/iter_{}.csv'.format(iteration))
+    #     for age_0, age_1, gmv_0, gmv_1 in zip(data.iloc[:, 0], data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]):
+    #         if np.random.rand() < 500 / len(data.index):
+    #             plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
+    #     plt.title('GMV progression after extraction', fontsize=15)
+    #     plt.xlabel('Age / year', fontsize=15)
+    #     plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
+    #     plt.xlim([45, 85])
+    #     plt.ylim([0.9e+6, 1.2e+6])
 
     plt.show()

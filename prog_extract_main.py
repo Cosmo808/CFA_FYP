@@ -2,7 +2,6 @@ from progression_feature_extraction import Prog_feat_extract
 from pd_data_preprocess import Pandas_data
 from stat_utils import Stat_utils
 from statsmodels.api import load
-import impyute.imputation.cs.mice as mice
 import numpy as np
 import pandas as pd
 import os
@@ -17,7 +16,6 @@ def save_np(file_name, np_array):
 
 
 if __name__ == "__main__":
-    imputation_flag = False
     data = Pandas_data()
     stat = Stat_utils()
     pd_age = data.age.iloc[:, 2:4]
@@ -31,9 +29,6 @@ if __name__ == "__main__":
     pd_age_gmv_sex_eth = pd_age_gmv_sex_eth.dropna(subset=['eth_0'])  # 41758
     pd_index = pd_age_gmv_sex_eth.index
 
-    if imputation_flag:
-        imputed_data = mice(pd_age_gmv_sex_eth.to_numpy())
-        save_np('cov_imputation', imputed_data)
     imputed_data = np.load('data/age_gmv_imputation/cov_imputation.npy')
     pd_imputed_data = pd.DataFrame(data=imputed_data, index=pd_index,
                                    columns=['age_2', 'age_3', 'gmv_2', 'gmv_3', 'sex', 'eth_0'])
