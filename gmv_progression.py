@@ -107,23 +107,20 @@ if __name__ == "__main__":
             plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
 
     # global trajectory
-    me_model = load('model/gmv&age_lme_model/age^2_lme_model')\
+    me_model = load('model/gmv&age_lme_model/age^2_lme_model')
 
-    # print(me_model.summary())
-    print(me_model.params)
     c = me_model.params['Intercept']
     b = me_model.params['age']
     a = me_model.params['age_2']
     x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
     y = a * (x ** 2) + b * x + c
-    print(a,b,c)
-    plt.plot(x, y, 'purple', linewidth=6, alpha=0.7)
+    plt.plot(x, y, 'darkblue', linewidth=6, alpha=0.8)
 
     plt.title('GMV progression across age', fontsize=15)
     plt.xlabel('Age / year', fontsize=15)
     plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
-    # plt.xlim([45, 85])
-    # plt.ylim([0.9e+6, 1.2e+6])
+    plt.xlim([45, 85])
+    plt.ylim([0.9e+6, 1.2e+6])
 
     # for iteration in range(100):
     #     plt.figure(iteration + 2)
