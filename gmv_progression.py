@@ -109,21 +109,10 @@ if __name__ == "__main__":
     # global trajectory
     me_model = load('model/gmv&age_lme_model/age^2_lme_model')\
 
-    random_effects = list(me_model.random_effects.items())
-    random_intercept = []
-    random_slope = []
-    for result in random_effects:
-        x = result[1]['Group']
-        y = result[1]['age']
-        random_intercept.append(x)
-        random_slope.append(y)
-
+    # print(me_model.summary())
     print(me_model.params)
-    params = me_model.summary().tables[1].iloc[:, 0]
-    print(params)
-    print(np.average(random_intercept), np.average(random_slope))
-    c = me_model.params['Intercept'] + np.average(random_intercept)
-    b = np.average(random_slope)
+    c = me_model.params['Intercept']
+    b = me_model.params['age']
     a = me_model.params['age_2']
     x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
     y = a * (x ** 2) + b * x + c

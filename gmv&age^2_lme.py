@@ -73,8 +73,9 @@ if __name__ == "__main__":
     reg_gmv = pd_ex_data['gmv'] - (params['sex'] * pd_ex_data['sex'] + params['ethnicity'] * pd_ex_data['ethnicity']
                                    + params['age'] * pd_ex_data['age'])
 
-    data = pd.concat([pd_ex_data['age'], pd_ex_data['gmv'], pd_ex_data['age'] ** 2], axis=1)
+    data = pd.concat([pd_ex_data['age'], reg_gmv, pd_ex_data['age'] ** 2], axis=1)
     data = data.set_axis([*data.columns[:-1], 'age_2'], axis=1, inplace=False)
+    data = data.rename(columns={0: 'gmv'})
     print(data)
     if lme_fit_flag:
         me_model = smf.mixedlm('gmv ~ age_2 + age',
