@@ -69,13 +69,15 @@ if __name__ == "__main__":
     pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'age_2'], axis=1, inplace=False)
     pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['delta_age'] ** 2], axis=1)
     pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'delta_age_2'], axis=1, inplace=False)
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['baseline_age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'baseline_age_2'], axis=1, inplace=False)
     print(pd_ex_data)
 
     if lme_fit_flag:
         me_model = smf.mixedlm('gmv ~ delta_age + baseline_age + sex + ethnicity',
                                data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
-        me_model.save('model/gmv&age_lme_model/delta_age+age_0+sex+eth')
+        me_model.save('model/gmv&age_lme_model/delta_age+age_0')
 
     me_model = load('model/gmv&age_lme_model/lme_model')
     print(me_model.summary())

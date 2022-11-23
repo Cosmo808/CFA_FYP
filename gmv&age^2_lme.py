@@ -61,27 +61,23 @@ if __name__ == "__main__":
 
     # total expanded data
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_delta_age, ex_imputed_gmv,
-                            ex_imputed_baseline_gmv, ex_imputed_sex, ex_imputed_eth], axis=1)
+                            ex_imputed_sex, ex_imputed_eth, ex_imputed_baseline_age], axis=1)
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
-                                            'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
+                                            'eth_0': 'ethnicity', 'age_2': 'baseline_age'})
 
-    me_model = load('model/gmv&age_lme_model/lme_model')
-    params = me_model.params
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'age_2'], axis=1, inplace=False)
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['delta_age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'delta_age_2'], axis=1, inplace=False)
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['baseline_age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'baseline_age_2'], axis=1, inplace=False)
+    print(pd_ex_data)
 
-    # regress out covariates
-    # reg_gmv = (B_0 + B_1 * delta_age) + b_0
-    reg_gmv = pd_ex_data['gmv'] - (params['sex'] * pd_ex_data['sex'] + params['ethnicity'] * pd_ex_data['ethnicity']
-                                   + params['age'] * pd_ex_data['age'])
-
-    data = pd.concat([pd_ex_data['age'], reg_gmv, pd_ex_data['age'] ** 2], axis=1)
-    data = data.set_axis([*data.columns[:-1], 'age_2'], axis=1, inplace=False)
-    data = data.rename(columns={0: 'gmv'})
-    print(data)
     if lme_fit_flag:
-        me_model = smf.mixedlm('gmv ~ age_2 + age',
-                               data=data, groups=data.index, re_formula='~ age')
+        me_model = smf.mixedlm('gmv ~ delta_age_2 + baseline_age_2 + delta_age + baseline_age + sex + ethnicity',
+                               data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
-        me_model.save('model/gmv&age_lme_model/age^2_lme_model')
+        me_model.save('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
 
     me_model = load('model/gmv&age_lme_model/age^2_lme_model')
     print(me_model.summary())

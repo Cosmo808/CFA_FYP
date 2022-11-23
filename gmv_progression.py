@@ -69,7 +69,7 @@ if __name__ == "__main__":
     pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['delta_age'] ** 2], axis=1)
     pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'delta_age_2'], axis=1, inplace=False)
 
-    me_model = load('model/gmv&age_lme_model/delta_age_2+delta_age+age0+sex+eth')
+    me_model = load('model/gmv&age_lme_model/delta_age_2+delta_age+age_0')
     params = me_model.params
 
     # regress out covariates
