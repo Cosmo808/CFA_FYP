@@ -147,7 +147,7 @@ if __name__ == "__main__":
     plt.xlabel('Age / year', fontsize=15)
     plt.ylabel('GMV regressing out sex and ethnicity', fontsize=15)
     plt.xlim([45, 85])
-    plt.ylim([0.9e+6, 1.2e+6])
+    # plt.ylim([0.9e+6, 1.2e+6])
     plt.legend()
 
     plt.show()
