@@ -60,17 +60,22 @@ if __name__ == "__main__":
 
     # total expanded data
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_delta_age, ex_imputed_gmv,
-                            ex_imputed_baseline_gmv, ex_imputed_sex, ex_imputed_eth], axis=1)
+                            ex_imputed_sex, ex_imputed_eth, ex_imputed_baseline_age], axis=1)
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
-                                            'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
+                                            'eth_0': 'ethnicity', 'age_2': 'baseline_age'})
 
-    me_model = load('model/gmv&age_lme_model/lme_model')
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'age_2'], axis=1, inplace=False)
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['delta_age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'delta_age_2'], axis=1, inplace=False)
+
+    me_model = load('model/gmv&age_lme_model/delta_age_2+delta_age+age0+sex+eth')
     params = me_model.params
 
     # regress out covariates
     # reg_gmv = (B_0 + B_1 * delta_age) + b_0
-    reg_gmv = pd_ex_data['gmv'] - (params['sex'] * pd_ex_data['sex'] + params['ethnicity'] * pd_ex_data['ethnicity']
-                                   + params['age'] * pd_ex_data['age'])
+    reg_gmv = pd_ex_data['gmv'] - (params['sex'] * pd_ex_data['sex'] + params['ethnicity'] * pd_ex_data['ethnicity'])
+                                   # + params['baseline_age'] * pd_ex_data['baseline_age'])
     reg_gmv_0 = reg_gmv.iloc[:int(len(reg_gmv) / 2)]
     reg_gmv_1 = reg_gmv.iloc[int(len(reg_gmv) / 2):]
 
@@ -101,29 +106,8 @@ if __name__ == "__main__":
     # plt.plot([-170000, 170000], [0, 0], '--', color='black', alpha=0.5)
     # plt.plot([0, 0], [-5000, 5000], '--', color='black', alpha=0.5)
 
-    plt.figure(1)
-    for age_0, age_1, gmv_0, gmv_1 in zip(pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1):
-        if np.random.rand() < 0.05:
-            plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
-
-    # global trajectory
-    me_model = load('model/gmv&age_lme_model/age^2_lme_model')
-
-    c = me_model.params['Intercept']
-    b = me_model.params['age']
-    a = me_model.params['age_2']
-    x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
-    y = a * (x ** 2) + b * x + c
-    plt.plot(x, y, 'darkblue', linewidth=6, alpha=0.8)
-
-    plt.title('GMV progression across age', fontsize=15)
-    plt.xlabel('Age / year', fontsize=15)
-    plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
-    plt.xlim([45, 85])
-    plt.ylim([0.9e+6, 1.2e+6])
-
     # for iteration in range(100):
-    #     plt.figure(iteration + 2)
+    #     plt.figure(iteration + 1)
     #     data = pd.read_csv('data/prog_feature_extract/iter_{}.csv'.format(iteration))
     #     for age_0, age_1, gmv_0, gmv_1 in zip(data.iloc[:, 0], data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]):
     #         if np.random.rand() < 500 / len(data.index):
@@ -133,5 +117,26 @@ if __name__ == "__main__":
     #     plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
     #     plt.xlim([45, 85])
     #     plt.ylim([0.9e+6, 1.2e+6])
+
+    plt.figure(2)
+    for age_0, age_1, gmv_0, gmv_1 in zip(pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1):
+        if np.random.rand() < 0.08:
+            plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
+
+    # global trajectory
+    d = me_model.params['Intercept']
+    c = me_model.params['baseline_age']
+    b = me_model.params['delta_age']
+    a = me_model.params['delta_age_2']
+    x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
+    x_0 = np.average(pd_imputed_age_0)
+    y = a * (x - x_0) ** 2 + b * (x - x_0) + c * x_0 + d
+    plt.plot(x, y, 'darkblue', linewidth=6, alpha=0.8)
+
+    plt.title('GMV progression across age', fontsize=15)
+    plt.xlabel('Age / year', fontsize=15)
+    plt.ylabel('GMV regressing out sex and ethnicity', fontsize=15)
+    plt.xlim([45, 85])
+    # plt.ylim([0.9e+6, 1.2e+6])
 
     plt.show()

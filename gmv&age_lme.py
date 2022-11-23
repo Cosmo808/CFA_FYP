@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from pd_data_preprocess import Pandas_data
 from stat_utils import Stat_utils
-from impyute.imputation.cs import mice
 import statsmodels.formula.api as smf
 from statsmodels.api import load
 
@@ -62,15 +61,21 @@ if __name__ == "__main__":
 
     # total expanded data
     pd_ex_data = pd.concat([ex_imputed_age, ex_imputed_delta_age, ex_imputed_gmv,
-                            ex_imputed_baseline_gmv, ex_imputed_sex, ex_imputed_eth], axis=1)
+                            ex_imputed_sex, ex_imputed_eth, ex_imputed_baseline_age], axis=1)
     pd_ex_data = pd_ex_data.rename(columns={0: 'age', 1: 'delta_age', 2: 'gmv',
-                                            'gmv_2': 'gmv_0', 'eth_0': 'ethnicity'})
-    # print(pd_ex_data)
+                                            'eth_0': 'ethnicity', 'age_2': 'baseline_age'})
+
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'age_2'], axis=1, inplace=False)
+    pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['delta_age'] ** 2], axis=1)
+    pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'delta_age_2'], axis=1, inplace=False)
+    print(pd_ex_data)
+
     if lme_fit_flag:
-        me_model = smf.mixedlm('gmv ~ age + sex + ethnicity',
+        me_model = smf.mixedlm('gmv ~ delta_age + baseline_age + sex + ethnicity',
                                data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
-        me_model.save('model/gmv&age_lme_model/lme_model')
+        me_model.save('model/gmv&age_lme_model/delta_age+age_0+sex+eth')
 
     me_model = load('model/gmv&age_lme_model/lme_model')
     print(me_model.summary())
