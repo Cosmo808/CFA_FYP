@@ -74,10 +74,10 @@ if __name__ == "__main__":
     print(pd_ex_data)
 
     if lme_fit_flag:
-        me_model = smf.mixedlm('gmv ~ delta_age_2 + baseline_age_2 + delta_age + baseline_age + sex + ethnicity',
+        me_model = smf.mixedlm('gmv ~ delta_age_2 + baseline_age_2 + delta_age + sex + ethnicity',
                                data=pd_ex_data, groups=pd_ex_data.index, re_formula='~ delta_age')
         me_model = me_model.fit(method=['lbfgs', 'cg'])
-        me_model.save('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
+        me_model.save('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
 
-    me_model = load('model/gmv&age_lme_model/age^2_lme_model')
+    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
     print(me_model.summary())

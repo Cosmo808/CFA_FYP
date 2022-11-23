@@ -69,7 +69,7 @@ if __name__ == "__main__":
     pd_ex_data = pd.concat([pd_ex_data, pd_ex_data['delta_age'] ** 2], axis=1)
     pd_ex_data = pd_ex_data.set_axis([*pd_ex_data.columns[:-1], 'delta_age_2'], axis=1, inplace=False)
 
-    me_model = load('model/gmv&age_lme_model/delta_age_2+delta_age+age_0')
+    me_model = load('model/gmv&age_lme_model/delta_age+age_0')
     params = me_model.params
 
     # regress out covariates
@@ -124,19 +124,30 @@ if __name__ == "__main__":
             plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
 
     # global trajectory
-    d = me_model.params['Intercept']
-    c = me_model.params['baseline_age']
-    b = me_model.params['delta_age']
-    a = me_model.params['delta_age_2']
+    me_model = load('model/gmv&age_lme_model/delta_age+age_0')
+    params = me_model.params
+    a = params['delta_age']
+    b = params['baseline_age']
+    c = params['Intercept']
     x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
-    x_0 = np.average(pd_imputed_age_0)
-    y = a * (x - x_0) ** 2 + b * (x - x_0) + c * x_0 + d
-    plt.plot(x, y, 'darkblue', linewidth=6, alpha=0.8)
+    delta_age = np.average(pd_imputed_age_1 - pd_imputed_age_0)
+    y = a * delta_age + b * x + c
+    plt.plot(x, y, 'darkblue', linewidth=5, alpha=0.8, label='linear')
+
+    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
+    params = me_model.params
+    a = params['delta_age_2']
+    b = params['baseline_age_2']
+    c = params['delta_age']
+    d = params['Intercept']
+    y = a * delta_age ** 2 + b * x ** 2 + c * delta_age + d
+    plt.plot(x, y, 'darkred', linewidth=5, alpha=0.8, label='non-linear')
 
     plt.title('GMV progression across age', fontsize=15)
     plt.xlabel('Age / year', fontsize=15)
     plt.ylabel('GMV regressing out sex and ethnicity', fontsize=15)
     plt.xlim([45, 85])
     # plt.ylim([0.9e+6, 1.2e+6])
+    plt.legend()
 
     plt.show()

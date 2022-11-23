@@ -16,7 +16,7 @@ def save_np(file_name, np_array):
 
 
 if __name__ == "__main__":
-    lme_fit_flag = True
+    lme_fit_flag = False
     data = Pandas_data()
     stat = Stat_utils()
     pd_age = data.age.iloc[:, 2:4]
@@ -79,5 +79,5 @@ if __name__ == "__main__":
         me_model = me_model.fit(method=['lbfgs', 'cg'])
         me_model.save('model/gmv&age_lme_model/delta_age+age_0')
 
-    me_model = load('model/gmv&age_lme_model/lme_model')
+    me_model = load('model/gmv&age_lme_model/delta_age+age_0')
     print(me_model.summary())
