@@ -8,6 +8,7 @@ import matplotlib.cm as cm
 from collections import Counter
 import math
 import os
+from scipy.stats import chi2
 from statsmodels.api import load
 import impyute.imputation.cs.mice as mice
 import statsmodels.formula.api as smf
@@ -25,6 +26,12 @@ def save_np(file_name, np_array):
 
 
 if __name__ == "__main__":
-    a=np.array([0])
-    b = np.array([1])
-    print((b[0]/a[0])<1)
+    me_1 = load('model/gmv&age_lme_model/delta_age+age_0')
+    # me_2 = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
+    #
+    # LR_statistic = -2 * (me_1.llf - me_2.llf)
+    # p_value = chi2.sf(LR_statistic, 2)
+
+    print(me_1.summary())
+    print(me_1.summary().tables[0].iloc[1, 1])
+    print(me_1.llf)
