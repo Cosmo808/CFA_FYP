@@ -2,17 +2,96 @@ from pd_data_preprocess import Pandas_data
 from stat_utils import Stat_utils
 import matplotlib.pyplot as plt
 from statsmodels.api import load
+import statsmodels.api as sm
 import numpy as np
 import pandas as pd
-import os
 
 
-def save_np(file_name, np_array):
-    np_array_path = 'data/age_gmv_imputation'
-    if not os.path.exists(np_array_path):
-        os.makedirs(np_array_path)
-    file_name = os.path.join(np_array_path, file_name)
-    np.save(file_name, np_array)
+def plot_points_global_trajectory():
+    plt.figure()
+    for age_0, age_1, gmv_0, gmv_1 in zip(pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1):
+        if np.random.rand() < 0.08:
+            plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand()*0.7)
+
+    # global trajectory
+    me_model = load('model/gmv&age_lme_model/delta_age+age_0')
+    params = me_model.params
+    a = params['delta_age']
+    b = params['baseline_age']
+    c = params['Intercept']
+    x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
+    delta_age = np.average(pd_imputed_age_1 - pd_imputed_age_0)
+    y = a * delta_age + b * x + c
+    # plt.plot(x, y, 'saddlebrown', linewidth=5, alpha=1, label='linear global')
+
+    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
+    params = me_model.params
+    a = params['delta_age_2']
+    b = params['baseline_age_2']
+    c = params['delta_age']
+    d = params['baseline_age']
+    e = params['Intercept']
+    y = a * delta_age ** 2 + b * x ** 2 + c * delta_age + d * x + e
+    plt.plot(x, y, 'darkred', linewidth=5, alpha=0.8, label='non-linear global')
+
+    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
+    params = me_model.params
+    a = params['delta_age_2']
+    b = params['baseline_age_2']
+    c = params['delta_age']
+    d = params['Intercept']
+    y = a * delta_age ** 2 + b * x ** 2 + c * delta_age + d
+    # plt.plot(x, y, 'deeppink', linewidth=5, alpha=0.8, label='non-linear exclude age0')
+
+    # LOWESS
+    lowess = sm.nonparametric.lowess
+    x = ex_imputed_age
+    y = reg_gmv
+    frac = 1 / 3
+    lowess_flag = False
+    if lowess_flag:
+        lowess_model = lowess(y, x, frac=frac)
+        np.save('model/reg_gmv&age_lowess_np/lowess_{}'.format(str(np.round(frac, 3))), lowess_model)
+    lowess_model = np.load('model/reg_gmv&age_lowess_np/lowess_{}.npy'.format(str(np.round(frac, 3))))
+    sample_size = int(0.03*len(x))
+    lowess_model = pd.DataFrame(lowess_model).drop_duplicates().sample(n=sample_size).sort_values(by=0)
+    plt.plot(lowess_model[0], lowess_model[1], 'midnightblue', linewidth=5, alpha=0.9, label='LOWESS')
+
+    plt.title('GMV progression across age', fontsize=15)
+    plt.xlabel('Age / year', fontsize=15)
+    plt.ylabel('GMV regressing out sex and ethnicity', fontsize=15)
+    plt.xlim([45, 85])
+    plt.ylim([6.5e+5, 9.5e+5])
+    plt.legend()
+
+
+def plot_random_coefficient():
+    plt.figure()
+    corr = params['Group x delta_age Cov'] / (params['Group Var'] * params['delta_age Var']) ** 0.5
+    random_effects = list(me_model.random_effects.items())
+    random_intercept = []
+    random_slope_delta_age = []
+
+    for result in random_effects:
+        x = result[1]['Group']
+        y = result[1]['delta_age']
+        random_intercept.append(x)
+        random_slope_delta_age.append(y)
+        if np.random.rand() < 0.05:
+            plt.scatter(x, y, alpha=np.random.rand())
+    plt.title('Correlation between random coefficients', fontsize=15)
+    plt.xlabel('random intercept (baseline status)', fontsize=15)
+    plt.ylabel('random slope (rate of change per year)', fontsize=15)
+    plt.xlim([-170000, 170000])
+    plt.ylim([-5000, 5000])
+    plt.annotate('Pearson Correlation = {}'.format(np.round(corr, 3)), xy=(1, 0), xycoords='axes fraction',
+                 horizontalalignment='right', verticalalignment='bottom', fontsize=15)
+
+    stat.linear_regression_params(np.array(random_intercept).reshape(-1, 1), random_slope_delta_age)
+    pred_slope = stat.lr_prediction
+    plt.plot(random_intercept, pred_slope, 'purple', linewidth=6, alpha=0.7)
+    plt.plot([-170000, 170000], [0, 0], '--', color='black', alpha=0.5)
+    plt.plot([0, 0], [-5000, 5000], '--', color='black', alpha=0.5)
 
 
 if __name__ == "__main__":
@@ -75,80 +154,8 @@ if __name__ == "__main__":
     # regress out covariates
     # reg_gmv = (B_0 + B_1 * delta_age) + b_0
     reg_gmv = pd_ex_data['gmv'] - (params['sex'] * pd_ex_data['sex'] + params['ethnicity'] * pd_ex_data['ethnicity'])
-                                   # + params['baseline_age'] * pd_ex_data['baseline_age'])
     reg_gmv_0 = reg_gmv.iloc[:int(len(reg_gmv) / 2)]
     reg_gmv_1 = reg_gmv.iloc[int(len(reg_gmv) / 2):]
 
-    # plt.figure(0)
-    # corr = params['Group x delta_age Cov'] / (params['Group Var'] * params['delta_age Var']) ** 0.5
-    # random_effects = list(me_model.random_effects.items())
-    # random_intercept = []
-    # random_slope_delta_age = []
-    #
-    # for result in random_effects:
-    #     x = result[1]['Group']
-    #     y = result[1]['delta_age']
-    #     random_intercept.append(x)
-    #     random_slope_delta_age.append(y)
-    #     if np.random.rand() < 0.05:
-    #         plt.scatter(x, y, alpha=np.random.rand())
-    # plt.title('Correlation between random coefficients', fontsize=15)
-    # plt.xlabel('random intercept (baseline status)', fontsize=15)
-    # plt.ylabel('random slope (rate of change per year)', fontsize=15)
-    # plt.xlim([-170000, 170000])
-    # plt.ylim([-5000, 5000])
-    # plt.annotate('Pearson Correlation = {}'.format(np.round(corr, 3)), xy=(1, 0), xycoords='axes fraction',
-    #              horizontalalignment='right', verticalalignment='bottom', fontsize=15)
-    #
-    # linear_params = stat.linear_regression_params(np.array(random_intercept).reshape(-1, 1), random_slope_delta_age)
-    # pred_slope = stat.lr_prediction
-    # plt.plot(random_intercept, pred_slope, 'purple', linewidth=6, alpha=0.7)
-    # plt.plot([-170000, 170000], [0, 0], '--', color='black', alpha=0.5)
-    # plt.plot([0, 0], [-5000, 5000], '--', color='black', alpha=0.5)
-
-    # for iteration in range(100):
-    #     plt.figure(iteration + 1)
-    #     data = pd.read_csv('data/prog_feature_extract/iter_{}.csv'.format(iteration))
-    #     for age_0, age_1, gmv_0, gmv_1 in zip(data.iloc[:, 0], data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]):
-    #         if np.random.rand() < 500 / len(data.index):
-    #             plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
-    #     plt.title('GMV progression after extraction', fontsize=15)
-    #     plt.xlabel('Age / year', fontsize=15)
-    #     plt.ylabel('GMV after regressing out fixed effects', fontsize=15)
-    #     plt.xlim([45, 85])
-    #     plt.ylim([0.9e+6, 1.2e+6])
-
-    plt.figure(2)
-    for age_0, age_1, gmv_0, gmv_1 in zip(pd_imputed_age_0, pd_imputed_age_1, reg_gmv_0, reg_gmv_1):
-        if np.random.rand() < 0.08:
-            plt.plot([age_0, age_1], [gmv_0, gmv_1], alpha=np.random.rand())
-
-    # global trajectory
-    me_model = load('model/gmv&age_lme_model/delta_age+age_0')
-    params = me_model.params
-    a = params['delta_age']
-    b = params['baseline_age']
-    c = params['Intercept']
-    x = np.linspace(np.min(pd_imputed_age_0), np.max(pd_imputed_age_1), 200)
-    delta_age = np.average(pd_imputed_age_1 - pd_imputed_age_0)
-    y = a * delta_age + b * x + c
-    plt.plot(x, y, 'darkblue', linewidth=5, alpha=0.8, label='linear')
-
-    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
-    params = me_model.params
-    a = params['delta_age_2']
-    b = params['baseline_age_2']
-    c = params['delta_age']
-    d = params['baseline_age']
-    e = params['Intercept']
-    y = a * delta_age ** 2 + b * x ** 2 + c * delta_age + d * x + e
-    # plt.plot(x, y, 'darkred', linewidth=5, alpha=0.8, label='non-linear')
-
-    plt.title('GMV progression across age', fontsize=15)
-    plt.xlabel('Age / year', fontsize=15)
-    plt.ylabel('GMV regressing out sex and ethnicity', fontsize=15)
-    plt.xlim([45, 85])
-    # plt.ylim([0.9e+6, 1.2e+6])
-    plt.legend()
-
+    plot_points_global_trajectory()
     plt.show()

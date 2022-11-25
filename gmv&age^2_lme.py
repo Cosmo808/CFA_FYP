@@ -16,7 +16,7 @@ def save_np(file_name, np_array):
 
 
 if __name__ == "__main__":
-    lme_fit_flag = True
+    lme_fit_flag = False
     data = Pandas_data()
     stat = Stat_utils()
     pd_age = data.age.iloc[:, 2:4]
