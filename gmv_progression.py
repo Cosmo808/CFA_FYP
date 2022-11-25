@@ -134,14 +134,15 @@ if __name__ == "__main__":
     y = a * delta_age + b * x + c
     plt.plot(x, y, 'darkblue', linewidth=5, alpha=0.8, label='linear')
 
-    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
+    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
     params = me_model.params
     a = params['delta_age_2']
     b = params['baseline_age_2']
     c = params['delta_age']
-    d = params['Intercept']
-    y = a * delta_age ** 2 + b * x ** 2 + c * delta_age + d
-    plt.plot(x, y, 'darkred', linewidth=5, alpha=0.8, label='non-linear')
+    d = params['baseline_age']
+    e = params['Intercept']
+    y = a * delta_age ** 2 + b * x ** 2 + c * delta_age + d * x + e
+    # plt.plot(x, y, 'darkred', linewidth=5, alpha=0.8, label='non-linear')
 
     plt.title('GMV progression across age', fontsize=15)
     plt.xlabel('Age / year', fontsize=15)
