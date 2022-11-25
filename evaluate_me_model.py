@@ -42,6 +42,3 @@ if __name__ == "__main__":
     print('#### P-value =', np.round(p_value, 4))
     print('#### Include - Exclude\nAIC: {}\nBIC: {}'.format(np.round(aic_non_linear - aic_nl_exclude, 3),
                                                             np.round(bic_non_linear - bic_nl_exclude, 3)))
-
-    print(aic_linear, aic_non_linear, aic_nl_exclude)
-    print(bic_linear, bic_non_linear, bic_nl_exclude)
