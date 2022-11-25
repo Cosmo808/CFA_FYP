@@ -79,5 +79,5 @@ if __name__ == "__main__":
         me_model = me_model.fit(method=['lbfgs', 'cg'])
         me_model.save('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
 
-    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age+age_0')
+    me_model = load('model/gmv&age_lme_model/delta_age_2+age_0_2+delta_age')
     print(me_model.summary())
