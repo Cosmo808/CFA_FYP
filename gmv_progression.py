@@ -55,7 +55,7 @@ def plot_points_global_trajectory():
     lowess_model = np.load('model/reg_gmv&age_lowess_np/lowess_{}.npy'.format(str(np.round(frac, 3))))
     sample_size = int(0.03*len(x))
     lowess_model = pd.DataFrame(lowess_model).drop_duplicates().sample(n=sample_size).sort_values(by=0)
-    plt.plot(lowess_model[0], lowess_model[1], 'midnightblue', linewidth=5, alpha=0.9, label='LOWESS')
+    # plt.plot(lowess_model[0], lowess_model[1], 'midnightblue', linewidth=5, alpha=0.9, label='LOWESS')
 
     plt.title('GMV progression across age', fontsize=15)
     plt.xlabel('Age / year', fontsize=15)
